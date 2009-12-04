@@ -28,10 +28,9 @@
 #ifndef _xvc_XVC_CONTROL_H__
 #define _xvc_XVC_CONTROL_H__
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 #include <X11/Intrinsic.h>
 #include "xvc_error_item.h"
-#endif     // DOXYGEN_SHOULD_SKIP_THIS
+#include "options.h"
 
 // the following defines the xvc interface for UIs
 // they need to be implemented by any GUI anybody wants to add in the
@@ -52,9 +51,5 @@ void xvc_capture_stop_signal (Boolean wait_for_termination);
 Boolean xvc_capture_stop ();
 void xvc_capture_start ();
 Boolean xvc_frame_monitor ();
-
-// these are defined in options.c
-Boolean xvc_read_options_file ();
-Boolean xvc_write_options_file ();
 
 #endif     // _xvc_XVC_CONTROL_H__

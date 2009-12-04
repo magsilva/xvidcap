@@ -773,10 +773,10 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
 
     // start: sndchannels
 
+	/*
 	// only check audio settings if audio capture is enabled
     if (target->audioWanted == 1) {
-        if (target->au_targetCodec == AU_CODEC_VORBIS
-            && target->sndchannels != 2) {
+        if (target->au_targetCodec == AU_CODEC_VORBIS && target->sndchannels != 2) {
             errors =
                 errorlist_append ((lapp->current_mode == 0) ? 38 : 39, errors,
                                   lapp);
@@ -785,7 +785,8 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
                 return NULL;
             }
         }
-    }
+	}
+	 */
 
 	// end: sndchannels
 
@@ -1077,6 +1078,7 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
         // start: sndchannels
         // only check audio settings if audio capture is enabled
         if (non_target->audioWanted == 1) {
+			/*
             if (non_target->au_targetCodec == AU_CODEC_VORBIS
                 && non_target->sndchannels != 2) {
                 errors =
@@ -1087,6 +1089,7 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
                     return NULL;
                 }
             }
+			 */
         }
         // end: sndchannels
 

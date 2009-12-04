@@ -83,10 +83,8 @@ typedef struct  //_job
     int movie_no;
     /** \brief time per frame in milli secs */
     int time_per_frame;
-#ifdef HAVE_FFMPEG_AUDIO
     /** \brief sound device */
     char *snd_device;
-#endif     // HAVE_FFMPEG_AUDIO
 
     /*
      * some function pointers
@@ -134,10 +132,8 @@ typedef struct  //_job
     /** \brief color information retrieved from first XImage */
     ColorInfo *c_info;
 
-#ifdef USE_XDAMAGE
-//    XserverRegion dmg_region;
+	// XserverRegion dmg_region;
     Region dmg_region;
-#endif     // USE_XDAMAGE
 
     /** \brief the last capture session returned this errno */
     int capture_returned_errno;
@@ -160,8 +156,6 @@ void xvc_job_merge_and_remove_state (int merge_state, int remove_state);
 void xvc_job_keep_state (int state);
 void xvc_job_keep_and_merge_state (int merge_state, int remove_state);
 
-#ifdef USE_XDAMAGE
 //XserverRegion xvc_get_damage_region ();
 Region xvc_get_damage_region ();
-#endif     // USE_XDAMAGE
 #endif     // _xvc_JOB_H__

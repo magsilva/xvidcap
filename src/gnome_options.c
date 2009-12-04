@@ -25,13 +25,10 @@
  *
  */
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+#include <config.h>
 #endif
 
-#define DEBUGFILE "gnome_options.c"
-#endif     // DOXYGEN_SHOULD_SKIP_THIS
 
 #include <stdio.h>
 #include <stdlib.h>

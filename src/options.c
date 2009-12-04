@@ -1,9 +1,3 @@
-/**
- * \file options.c
- *
- * Contains common functions for handling persisten preferences storage
- * \todo implement the show_time feature
- */
 /*
  * Copyright (C) 1997,98 Rasca, Berlin
  * Copyright (C) 2003-07 Karl H. Beckers, Frankfurt
@@ -25,22 +19,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <ctype.h>
-#include <math.h>
-
-#include "job.h"
-#include "app_data.h"
-#include "codecs.h"
-#include "xvidcap-intl.h"
-
-#define OPS_FILE ".xvidcaprc"
+#include "options.h"
 
 /**
  * Saves the preferences to file.

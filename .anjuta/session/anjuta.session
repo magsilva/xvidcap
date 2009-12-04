@@ -3,9 +3,6 @@
 Maximized=1
 Geometry=1680x998+0+27
 
-[File Loader]
-Files=file:///home/magsilva/Projects-ICMC/xvidcap/src/main.c#80%%%file:///home/magsilva/Projects-ICMC/xvidcap/src/gnome_options.h#1%%%file:///home/magsilva/Projects-ICMC/xvidcap/src/options.c#1
-
 [Document Manager]
 bookmarks=<?xml version="1.0" encoding="UTF-8"?>\n<bookmarks/>\n
 
