@@ -1,0 +1,63 @@
+xvidcap (1.1.7) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Karl H. Beckers <karl.h.beckers@gmx.net>  Wed,  2 May 2008 10:00:00 +0100
+
+xvidcap (1.1.6) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Karl H. Beckers <karl.h.beckers@gmx.net>  Wed, 29 May 2007 10:00:00 +0100
+
+xvidcap (1.1.5) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Karl H. Beckers <karl.h.beckers@gmx.net>  Wed, 25 Apr 2007 10:00:00 +0100
+
+xvidcap (1.1.5rc3) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Karl H. Beckers <karl.h.beckers@gmx.net>  Fri, 11 Apr 2007 10:00:00 +0100
+
+xvidcap (1.1.5rc2) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Karl H. Beckers <karl.h.beckers@gmx.net>  Fri,  4 Apr 2007 10:00:00 +0100
+
+xvidcap (1.1.5rc1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Karl H. Beckers <karl.h.beckers@gmx.net>  Fri,  8 Feb 2007 10:00:00 +0100
+
+xvidcap (1.1.4p1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Karl H. Beckers <karl.h.beckers@gmx.net>  Fri, 16 Nov 2006 10:00:00 +0100
+
+xvidcap (1.1.4) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Karl H. Beckers <karl.h.beckers@gmx.net>  Fri, 30 Oct 2006 10:00:00 +0100
+
+xvidcap (1.1.4rc2) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Karl H. Beckers <karl.h.beckers@gmx.net>  Fri, 27 Aug 2006 22:40:42 +0200
+
+xvidcap (1.1.4rc1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Karl H. Beckers <karl.h.beckers@gmx.net>  Fri,  7 Jul 2006 22:40:42 +0200
+
+Local variables:
+mode: debian-changelog
+End:
