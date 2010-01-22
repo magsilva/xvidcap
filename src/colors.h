@@ -1,5 +1,5 @@
 /**
- * \file colors.h
+ * Utility functions for retrieving color information.
  */
 
 /*
@@ -28,8 +28,7 @@
 #endif     // HAVE_CONFIG_H
 
 /**
- * \brief struct to contain various color properties, like masks, depths,
- *      shifts etc.
+ * Struct to contain various color properties, like masks, depths, shifts etc.
  */
 typedef struct
 {
@@ -54,8 +53,23 @@ typedef struct
     u_int32_t alpha_mask;
 } ColorInfo;
 
-ColorInfo *xvc_get_color_info (const XImage * image);
-int xvc_get_colors (Display * dpy, const XWindowAttributes * winfo,
-                    XColor ** colors);
+/**
+ * Fills the ColorInfo struct with some useful color information, especially
+ * the masks and shifts are relevant
+ *
+ * @param image pointer to the XImage to assimilate color information from
+ * @param ci pointer to a ColorInfo struct
+ */
+ColorInfo *xvc_get_color_info(const XImage * image);
+
+/**
+ * Retrieves XColor array for a given window
+ *
+ * @param dpy pointer to the display to retrieve the information from
+ * @param winfo pointer to window attributes for which to retrieve colors information
+ * @param colors return pointer to an array of XColor elements
+ * @return the number of colors retrieved
+ */
+int xvc_get_colors(Display * dpy, const XWindowAttributes * winfo, XColor ** colors);
 
 #endif     // _xvc_COLORS_H__

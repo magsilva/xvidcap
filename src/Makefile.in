@@ -34,16 +34,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = xvidcap$(EXEEXT) $(am__EXEEXT_1)
-@SOLARIS_TRUE@am__append_1 = -lXext -lX11 
-@USE_DBUS_TRUE@am__append_2 = \
-@USE_DBUS_TRUE@	dbus-server-object.h \
-@USE_DBUS_TRUE@	dbus-server-object.c
-
-@USE_DBUS_TRUE@am__append_3 = xvidcap-dbus-client
-@USE_DBUS_TRUE@am__append_4 = xvidcap-dbus.xml
+bin_PROGRAMS = xvidcap$(EXEEXT) xvidcap-dbus-client$(EXEEXT)
 subdir = src
-DIST_COMMON = $(am__noinst_HEADERS_DIST) $(srcdir)/Makefile.am \
+DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
@@ -53,39 +46,25 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-@USE_DBUS_TRUE@am__EXEEXT_1 = xvidcap-dbus-client$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(gladedir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am__xvidcap_SOURCES_DIST = app_data.c app_data.h capture.c capture.h \
-	codecs.c codecs.h colors.c colors.h frame.c frame.h \
-	gnome_frame.c gnome_frame.h gnome_ui.c gnome_ui.h \
-	gnome_warning.c gnome_warning.h gnome_options.c \
-	gnome_options.h led_meter.c led_meter.h control.h main.c \
-	options.c xtoffmpeg.c xtoffmpeg.h xtoxwd.c xtoxwd.h job.c \
-	job.h xvc_error_item.c xvc_error_item.h xvidcap-intl.h \
-	eggtrayicon.h eggtrayicon.c dbus-server-object.h \
-	dbus-server-object.c
-@USE_DBUS_TRUE@am__objects_1 = dbus-server-object.$(OBJEXT)
 am_xvidcap_OBJECTS = app_data.$(OBJEXT) capture.$(OBJEXT) \
 	codecs.$(OBJEXT) colors.$(OBJEXT) frame.$(OBJEXT) \
 	gnome_frame.$(OBJEXT) gnome_ui.$(OBJEXT) \
 	gnome_warning.$(OBJEXT) gnome_options.$(OBJEXT) \
-	led_meter.$(OBJEXT) main.$(OBJEXT) options.$(OBJEXT) \
+	led_meter.$(OBJEXT) main.$(OBJEXT) preferences.$(OBJEXT) \
 	xtoffmpeg.$(OBJEXT) xtoxwd.$(OBJEXT) job.$(OBJEXT) \
 	xvc_error_item.$(OBJEXT) eggtrayicon.$(OBJEXT) \
-	$(am__objects_1)
+	dbus-server-object.$(OBJEXT)
 xvidcap_OBJECTS = $(am_xvidcap_OBJECTS)
 am__DEPENDENCIES_1 =
-xvidcap_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+xvidcap_DEPENDENCIES = $(am__DEPENDENCIES_1)
 xvidcap_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(xvidcap_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__xvidcap_dbus_client_SOURCES_DIST = xvidcap-dbus-client.c
-@USE_DBUS_TRUE@am_xvidcap_dbus_client_OBJECTS =  \
-@USE_DBUS_TRUE@	xvidcap-dbus-client.$(OBJEXT)
+am_xvidcap_dbus_client_OBJECTS = xvidcap-dbus-client.$(OBJEXT)
 xvidcap_dbus_client_OBJECTS = $(am_xvidcap_dbus_client_OBJECTS)
-@USE_DBUS_TRUE@xvidcap_dbus_client_DEPENDENCIES =  \
-@USE_DBUS_TRUE@	$(am__DEPENDENCIES_1)
+xvidcap_dbus_client_DEPENDENCIES = $(am__DEPENDENCIES_1)
 xvidcap_dbus_client_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(xvidcap_dbus_client_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -96,8 +75,7 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(xvidcap_SOURCES) $(xvidcap_dbus_client_SOURCES)
-DIST_SOURCES = $(am__xvidcap_SOURCES_DIST) \
-	$(am__xvidcap_dbus_client_SOURCES_DIST)
+DIST_SOURCES = $(xvidcap_SOURCES) $(xvidcap_dbus_client_SOURCES)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -106,8 +84,6 @@ am__vpath_adj = case $$p in \
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 gladeDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(glade_DATA)
-am__noinst_HEADERS_DIST = xvidcap-dbus-glue.h \
-	xvidcap-client-bindings.h
 HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -256,30 +232,59 @@ INCLUDES = \
 AM_CFLAGS = \
 	 -Wall\
 	 -g \
-	 -DDBUS_SERVICE_DIR=\""$(datadir)/dbus-1/service"\"
+	 -std=c99
 
-xvidcap_SOURCES = app_data.c app_data.h capture.c capture.h codecs.c \
-	codecs.h colors.c colors.h frame.c frame.h gnome_frame.c \
-	gnome_frame.h gnome_ui.c gnome_ui.h gnome_warning.c \
-	gnome_warning.h gnome_options.c gnome_options.h led_meter.c \
-	led_meter.h control.h main.c options.c xtoffmpeg.c xtoffmpeg.h \
-	xtoxwd.c xtoxwd.h job.c job.h xvc_error_item.c \
-	xvc_error_item.h xvidcap-intl.h eggtrayicon.h eggtrayicon.c \
-	$(am__append_2)
-xvidcap_LDADD = $(PACKAGE_LIBS) $(am__append_1)
-@SOLARIS_FALSE@xvidcap_LDFLAGS = -export-dynamic
-@SOLARIS_TRUE@xvidcap_LDFLAGS = 
-EXTRA_DIST = $(glade_DATA) $(am__append_4)
-@USE_DBUS_TRUE@xvidcap_dbus_client_SOURCES = xvidcap-dbus-client.c
-@USE_DBUS_TRUE@xvidcap_dbus_client_LDADD = $(PACKAGE_LIBS)
-@SOLARIS_FALSE@@USE_DBUS_TRUE@xvidcap_dbus_client_LDFLAGS = -export-dynamic
-@SOLARIS_TRUE@@USE_DBUS_TRUE@xvidcap_dbus_client_LDFLAGS = 
-@USE_DBUS_TRUE@BUILT_SOURCES = xvidcap-dbus-glue.h xvidcap-client-bindings.h
+xvidcap_SOURCES = \
+    app_data.c \
+    app_data.h \
+    capture.c \
+    capture.h \
+    codecs.c \
+    codecs.h \
+    colors.c \
+    colors.h \
+    frame.c \
+    frame.h \
+    gnome_frame.c \
+    gnome_frame.h \
+    gnome_ui.c \
+    gnome_ui.h \
+    gnome_warning.c \
+    gnome_warning.h \
+    gnome_options.c \
+    gnome_options.h \
+    led_meter.c \
+    led_meter.h \
+    control.h \
+    main.c \
+    preferences.c \
+    xtoffmpeg.c \
+    xtoffmpeg.h \
+    xtoxwd.c \
+    xtoxwd.h \
+    job.c \
+    job.h \
+    xvc_error_item.c \
+    xvc_error_item.h \
+    xvidcap-intl.h \
+    eggtrayicon.h \
+    eggtrayicon.c \
+    dbus-server-object.h \
+    dbus-server-object.c
+
+xvidcap_LDADD = $(PACKAGE_LIBS)
+xvidcap_LDFLAGS = -export-dynamic
+EXTRA_DIST = $(glade_DATA) xvidcap-dbus.xml
+xvidcap_dbus_client_SOURCES = xvidcap-dbus-client.c
+xvidcap_dbus_client_LDADD = $(PACKAGE_LIBS)
+xvidcap_dbus_client_LDFLAGS = -export-dynamic
+
 # We don't want to install this header
-@USE_DBUS_TRUE@noinst_HEADERS = $(BUILT_SOURCES)
+BUILT_SOURCES = xvidcap-dbus-glue.h xvidcap-client-bindings.h
+noinst_HEADERS = $(BUILT_SOURCES)
 
 # Correctly clean the generated headers, but keep the xml description
-@USE_DBUS_TRUE@CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -364,7 +369,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/job.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/led_meter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/preferences.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xtoffmpeg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xtoxwd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xvc_error_item.Po@am__quote@
@@ -582,13 +587,14 @@ uninstall-am: uninstall-binPROGRAMS uninstall-gladeDATA
 	tags uninstall uninstall-am uninstall-binPROGRAMS \
 	uninstall-gladeDATA
 
+	 -DDBUS_SERVICE_DIR=\""$(datadir)/dbus-1/service"\"
 
 #Rule to generate the binding headers
-@USE_DBUS_TRUE@xvidcap-dbus-glue.h:  xvidcap-dbus.xml
-@USE_DBUS_TRUE@	dbus-binding-tool --prefix=xvc_server --mode=glib-server $<> $@
+xvidcap-dbus-glue.h:  xvidcap-dbus.xml
+	dbus-binding-tool --prefix=xvc_server --mode=glib-server $<> $@
 
-@USE_DBUS_TRUE@xvidcap-client-bindings.h:  xvidcap-dbus.xml
-@USE_DBUS_TRUE@	dbus-binding-tool --prefix=xvc_server --mode=glib-client $<> $@
+xvidcap-client-bindings.h:  xvidcap-dbus.xml
+	dbus-binding-tool --prefix=xvc_server --mode=glib-client $<> $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

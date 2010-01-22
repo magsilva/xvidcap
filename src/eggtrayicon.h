@@ -1,4 +1,3 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* eggtrayicon.h
  * Copyright (C) 2002 Anders Carlsson <andersca@gnu.org>
  *
@@ -22,9 +21,7 @@
 #define _xvc_EGG_TRAY_ICON_H__
 
 #include <gtk/gtkplug.h>
-#ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
-#endif
 
 G_BEGIN_DECLS
 #define EGG_TYPE_TRAY_ICON		(egg_tray_icon_get_type ())
@@ -33,39 +30,39 @@ G_BEGIN_DECLS
 #define EGG_IS_TRAY_ICON(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), EGG_TYPE_TRAY_ICON))
 #define EGG_IS_TRAY_ICON_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), EGG_TYPE_TRAY_ICON))
 #define EGG_TRAY_ICON_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS ((obj), EGG_TYPE_TRAY_ICON, EggTrayIconClass))
+
 typedef struct _eggTrayIcon EggTrayIcon;
+
 typedef struct _eggTrayIconClass EggTrayIconClass;
 
 struct _eggTrayIcon
 {
-    GtkPlug parent_instance;
+	GtkPlug parent_instance;
 
-    guint stamp;
+	guint stamp;
 
-#ifdef GDK_WINDOWING_X11
-    Atom selection_atom;
-    Atom manager_atom;
-    Atom system_tray_opcode_atom;
-    Atom orientation_atom;
-    Window manager_window;
-#endif
-    GtkOrientation orientation;
+	Atom selection_atom;
+	Atom manager_atom;
+	Atom system_tray_opcode_atom;
+	Atom orientation_atom;
+	Window manager_window;
+
+	GtkOrientation orientation;
 };
 
 struct _eggTrayIconClass
 {
-    GtkPlugClass parent_class;
+	GtkPlugClass parent_class;
 };
 
 GType egg_tray_icon_get_type (void);
 
-EggTrayIcon *egg_tray_icon_new_for_screen (GdkScreen * screen,
-                                           const gchar * name);
+EggTrayIcon *egg_tray_icon_new_for_screen (GdkScreen * screen, const gchar * name);
 
 EggTrayIcon *egg_tray_icon_new (const gchar * name);
 
-guint egg_tray_icon_send_message (EggTrayIcon * icon,
-                                  gint timeout, const char *message, gint len);
+guint egg_tray_icon_send_message (EggTrayIcon * icon, gint timeout, const char *message, gint len);
+
 void egg_tray_icon_cancel_message (EggTrayIcon * icon, guint id);
 
 GtkOrientation egg_tray_icon_get_orientation (EggTrayIcon * icon);

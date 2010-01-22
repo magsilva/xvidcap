@@ -21,10 +21,8 @@ AC_PROG_RANLIB
 AC_PROG_AWK
 AC_PROG_SED
 AC_PATH_PROG(BC,bc,no)
-
 AC_PATH_XTRA
-#########################################################
-#########################################################
+
 
 #SCROLLKEEPER##############################################
 #########################################################
@@ -38,6 +36,7 @@ fi
 
 # here follows a hack to get the docs installed in a separate, recursive install-doc target
 MK=''; AC_SUBST(MK)
+
 #########################################################
 #########################################################
 AC_PATH_PROG(DOCBOOK2X_MAN,docbook2x-man,no)
@@ -54,13 +53,14 @@ AC_PATH_PROG(XML2PO,xml2po,no)
 if test x$XML2PO = xno; then
   AC_MSG_NOTICE(Couldn't find xml2po to translate current man pages. Will install pre-generated ones if present.)
 fi
+
+
+
 #MANPAGES###############################################
 #########################################################
 
-#########################################################
-#########################################################
 
-#########################################################
+
 ########################################################
 #i18n####################################################
 #########################################################
@@ -88,53 +88,7 @@ AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
 
 
-#########################################################
-#########################################################
 
-
-
-#########################################################
-#########################################################
-# fist remove symlinks in ffmpeg dir
-# these symlinks are needed for static linking, but make dynamic
-# linking fail if you first configured with static and then with
-# dynamic ffmpeg
-#########################################################
-rm ffmpeg/adler32.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/avcodec.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/avutil.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/avdevice.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/common.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/dsputil.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/integer.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/intfloat_readwrite.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/log.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/mathematics.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/md5.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/rational.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/avformat.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/avio.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/rtp.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/rtsp.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/rtspcodes.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/rtp_h264.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/rtp_internal.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/rtp_aac.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/rtp_mpv.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/fifo.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/swscale.h >/dev/null 2>&1 || echo "" > /dev/null
-rm ffmpeg/rgb2rgb.h >/dev/null 2>&1 || echo "" > /dev/null
-#########################################################
-#########################################################
-
-
-#########################################################
-#########################################################
-# define macro
-# AC_CHECK_LIB_STATIC(LIBRARY, FUNCTION,
-#			[ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND],
-#			[OTHER-LIBRARIES])
-#########################################################
 
 # set defaults for ld parameters to trigger static/dynamic linking
 # they should be adapted prior to calling this function
@@ -196,56 +150,9 @@ AS_VAR_POPDEF([ac_Lib])
 # can't do that with other Makefile defines because I need OS specific
 # ld params for testing
 #########################################################
-AM_CONDITIONAL(SOLARIS,[test x`(uname -s)` = xSunOS])
 AM_CONDITIONAL(LINUX,[test x`(uname -s)` = xLinux])
-AM_CONDITIONAL(HPUX,[test x`(uname -s)` = xHP-UX])
-if ( test x${HPUX_TRUE} = x ) ; then
-	ac_my_static_ld="-a archive"
-	ac_my_dynamic_ld="-a default"
-else
-	ac_my_static_ld="-Wl,-Bstatic"
-	ac_my_dynamic_ld="-Wl,-Bdynamic"
-fi
-AM_CONDITIONAL(FREEBSD,[test x`(uname -s)` = xFreeBSD])
-#########################################################
-#########################################################
-
-
-#########################################################
-#########################################################
-# user options
-#########################################################
-AC_ARG_WITH(forced-embedded-ffmpeg, AC_HELP_STRING([--without-forced-embedded-ffmpeg],
-			[try to use ffmpeg provided by the system rather than the one included (default=always use included ffmpeg)]),
-			[ac_cv_with_embedded_ffmpeg=$withval],
-			[ac_cv_with_embedded_ffmpeg=yes])
-
-# set static_avcodec = yes if avcodec is in
-static_avcodec=${ac_cv_with_embedded_ffmpeg}
-
-# if avcodec is static, avformat and avutil are, too.
-test x$static_avcodec = xyes && static_avformat=yes
-test x$static_avcodec = xyes && static_avutil=yes
-
-AC_ARG_ENABLE(libmp3lame,AC_HELP_STRING([--enable-libmp3lame], 
-			[use libmp3lame if found (default=enabled)]),
-			[ac_cv_enable_libmp3lame=$enableval],
-			[ac_cv_enable_libmp3lame=yes])
-AC_ARG_ENABLE(libtheora,AC_HELP_STRING([--enable-libtheora], 
-			[use libtheora if found (default=disabled)]),
-			[ac_cv_enable_libtheora=$enableval],
-			[ac_cv_enable_libtheora=no])
-dnl AC_ARG_ENABLE(libvorbis,AC_HELP_STRING([--enable-libvorbis], 
-dnl 			[use libvorbis if found (default=disabled)]),
-dnl 			[ac_cv_enable_libvorbis=$enableval],
-dnl 			[ac_cv_enable_libvorbis=no])
-AC_ARG_ENABLE(patented,AC_HELP_STRING([--disable-patented],
-			[disable patented codecs and file formates (default=enabled)]),
-			[ac_cv_enable_patented=$enableval],
-			[ac_cv_enable_patented=yes])
-
-#########################################################
-#########################################################
+ac_my_static_ld="-Wl,-Bstatic"
+ac_my_dynamic_ld="-Wl,-Bdynamic"
 
 
 #########################################################
@@ -257,196 +164,45 @@ AC_ARG_ENABLE(patented,AC_HELP_STRING([--disable-patented],
 # X11 libraries
 #########################################################
 
-if test "x${ac_cv_have_x}" = "x" ; then
-    echo "xvidcap needs X11 runtime and build environment"
-    exit 1
-fi
-
 # first check for Xmu without tweaking, then in X11 paths
-AC_CHECK_LIB(Xmu,XmuClientWindow,,[unset ac_cv_lib_Xmu_XmuClientWindow; echo "Couldn't find libXmu in LD_LIBRARY_PATH, checking X11 paths"; AC_CHECK_LIB(Xmu,XmuClientWindow,LDFLAGS="${LDFLAGS} -L${ac_x_libraries} -Xlinker -R${ac_x_libraries}"; LIBS="${LIBS} -lXmu",echo "libXmu required for drawing the frame around the area to capture" && exit 1,[-L${ac_x_libraries}])])
+AC_CHECK_LIB(Xmu, XmuClientWindow,,[echo "Couldn't find libXmu in LD_LIBRARY_PATH, checking X11 paths"; AC_CHECK_LIB(Xmu,XmuClientWindow,LDFLAGS="${LDFLAGS} -L${ac_x_libraries} -Xlinker -R${ac_x_libraries}"; LIBS="${LIBS} -lXmu",echo "libXmu required for drawing the frame around the area to capture" && exit 1,[-L${ac_x_libraries}])])
 
 # first check for Xfixes without tweaking, then in X11 paths
-AC_CHECK_LIB(Xfixes,XFixesGetCursorImage,,[unset ac_cv_lib_Xfixes_XFixesGetCursorImage; echo "Couldn't find libXfixes in LD_LIBRARY_PATH, checking X11 paths"; AC_CHECK_LIB(Xfixes,XFixesGetCursorImage,LDFLAGS="${LDFLAGS} -L${ac_x_libraries} -Xlinker -R${ac_x_libraries}"; LIBS="${LIBS} -lXfixes",[echo "libXfixes not available, cannot capture real mouse pointer"],[-L${ac_x_libraries}])])
+AC_CHECK_LIB(Xfixes, XFixesGetCursorImage,,[echo "Couldn't find libXfixes in LD_LIBRARY_PATH, checking X11 paths"; AC_CHECK_LIB(Xfixes,XFixesGetCursorImage,LDFLAGS="${LDFLAGS} -L${ac_x_libraries} -Xlinker -R${ac_x_libraries}"; LIBS="${LIBS} -lXfixes",[echo "libXfixes not available, cannot capture real mouse pointer"],[-L${ac_x_libraries}])])
 
 # first check for Xdamage without tweaking, then in X11 paths
-AC_CHECK_LIB(Xdamage,XDamageSubtract,,[unset ac_cv_lib_Xdamage_XDamageSubtract; echo "Couldn't find libXdamage in LD_LIBRARY_PATH, checking X11 paths"; AC_CHECK_LIB(Xdamage,XDamageSubtract,LDFLAGS="${LDFLAGS} -L${ac_x_libraries} -Xlinker -R${ac_x_libraries}"; LIBS="${LIBS} -lXdamage",[echo "libXdamage not available, cannot use delta screenshots"],[-L${ac_x_libraries}])])
-
-## libice test is present, but we need to bail out if not there
-
-if test "x${ac_cv_lib_ICE_IceConnectionNumber+set}" = "x"; then
-  echo "Your X11 environment is missing libice."
-  exit 1
-fi
+AC_CHECK_LIB(Xdamage, XDamageSubtract,,[echo "Couldn't find libXdamage in LD_LIBRARY_PATH, checking X11 paths"; AC_CHECK_LIB(Xdamage,XDamageSubtract,LDFLAGS="${LDFLAGS} -L${ac_x_libraries} -Xlinker -R${ac_x_libraries}"; LIBS="${LIBS} -lXdamage",[echo "libXdamage not available, cannot use delta screenshots"],[-L${ac_x_libraries}])])
 
 
 #########################################################
 
-#########################################################
-# libm is required by ffmpeg
-#########################################################
-AC_CHECK_LIB(m,pow,,echo "libm required by ffmpeg"; static_avcodec=no; static_avformat=no; static_avutil=no)
-#########################################################
+AC_CHECK_LIB(m,pow,,echo "libm required by ffmpeg")
 
-################################################################
-# check for libmp3lame et. al.
-################################################################
-
-if test "${ac_cv_enable_patented}" = "yes"; then 
-    if test "${ac_cv_enable_libmp3lame}" = "yes"; then 
-	AC_CHECK_LIB(mp3lame, lame_init,,
-					[echo "To use mp3 audio codecs you need liblame/liblame-dev"])
-    fi
-fi
+AC_CHECK_LIB(mp3lame, lame_init,, [echo "To use mp3 audio codecs you need liblame/liblame-dev"], [-lmp3lame])
 AM_CONDITIONAL(HAVE_LIBMP3LAME, test x$ac_cv_lib_mp3lame_lame_init = xyes)
 
-dnl if test "${ac_cv_enable_libvorbis}" = "yes"; then
-dnl 	AC_CHECK_LIB(vorbisenc, vorbis_encode_init,,
-dnl 					[echo "To use the vorbis audio codec you need libvorbisenc/libvorbisenc-dev"],
-dnl 					[-lvorbis])
-dnl fi
-dnl AM_CONDITIONAL(HAVE_LIBVORBISENC, test x$ac_cv_lib_vorbisenc_vorbis_encode_init = xyes)
+AC_CHECK_LIB(vorbisenc, vorbis_encode_init,, [echo "To use the vorbis audio codec you need libvorbisenc/libvorbisenc-dev"], [-lvorbis])
+AM_CONDITIONAL(HAVE_LIBVORBISENC, test x$ac_cv_lib_vorbisenc_vorbis_encode_init = xyes)
 
-if test "${ac_cv_enable_libtheora}" = "yes"; then
-	AC_CHECK_LIB(ogg, ogg_sync_init,,[echo "To use the theora video codec you also need libogg/libogg-dev"])
-	if test "x${ac_cv_lib_ogg_ogg_sync_init}" = "xno" ; then
-		echo "Please install the required libraries or deselect theora support."
-		exit 1
-	fi
-	AC_CHECK_LIB(theora, theora_encode_init,,
-					[echo "To use the theora video codec you need libtheora/libtheora-dev"],
-					[-logg])
-fi
+AC_CHECK_LIB(ogg, ogg_sync_init,,[echo "To use the theora video codec you also need libogg/libogg-dev"])
+AC_CHECK_LIB(theora, theora_encode_init,, [echo "To use the theora video codec you need libtheora/libtheora-dev"], [-logg])
 AM_CONDITIONAL(HAVE_LIBTHEORA, test x$ac_cv_lib_theora_theora_encode_init = xyes)
-
-################################################################
-# check for threading libraries
-################################################################
 
 ACX_PTHREAD([
 	LIBS="$PTHREAD_LIBS $LIBS"
 	CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 	CC="$PTHREAD_CC"
 ],[
-	# I'm keeping this in here because I'm unsure how well ACX_PTHREAD works for FreeBSD
-	# it should, but seems to use -kthread and I don't know about that, and -lc_r 
-	# worked in the past.
-	if ( `test x${FREEBSD_TRUE} = "x"` ) ; then
-		# On FreeBSD try -lc_r ... thanks to Oyvind Hallsteinsen
-		if ( test -x /sbin/sysctl ) ; then
-	 		ac_my_freebsd_release=`/sbin/sysctl -n kern.osreldate`
-		else
-	 		ac_my_freebsd_release=`/usr/sbin/sysctl -n kern.osreldate`
-		fi	
-		if ( expr ${ac_my_freebsd_release} \>= 500016 ) ; then
-			LIBS="${LIBS} -lc_r"
-		fi
-	else
-		echo "xvidcap requires libpthread for recording. This machine doesn't have the libraries and/or header files installed."
-		exit 1
-	fi
+	echo "xvidcap requires libpthread for recording. This machine doesn't have the libraries and/or header files installed."
+	exit 1
 ])
 
-#########################################################
-# avcodec/avformat
-# test static linking first, if requested ... if not, or not found, reset cache
-#########################################################
-
-dnl if ( ! (test x$ac_cv_with_embedded_ffmpeg = xyes ) ) ; then
-dnl 	ac_my_static_avutil_save=$static_avutil
-dnl 	AC_CHECK_LIB_STATIC(avutil, av_rescale,,[unset ac_cv_lib_avutil_av_rescale])
-dnl 	static_avutil=$ac_my_static_avutil_save
-dnl fi
-
-if test "${ac_cv_enable_patented}" = "yes"; then 
-    test x$ac_cv_lib_mp3lame_lame_init = xyes && ac_my_ffmpeg_cfg_lib_switch="--enable-libmp3lame"
-else
-    ac_my_ffmpeg_cfg_lib_switch="${ac_my_ffmpeg_cfg_lib_switch} --disable-decoders --enable-decoder=vorbis --disable-encoders --enable-encoder=vorbis --enable-encoder=libtheora --enable-encoder=dvvideo --disable-muxers --enable-muxer=ogg --enable-muxer=dv --disable-demuxers --enable-demuxer=ogg --disable-parsers --disable-protocol=rtp --disable-bsfs"
-fi
-test x$ac_cv_lib_theora_theora_encode_init = xyes && ac_my_ffmpeg_cfg_lib_switch="${ac_my_ffmpeg_cfg_lib_switch} --enable-libtheora"
-
-# if cache empty (not tested or failed) and want static avcodec (then it failed) ...
-if ( `test \( \( x${ac_cv_lib_avutil_av_rescale+set} = x \) -a \( x$static_avutil = xyes \) \)` ) ; then
-	# build embedded ffmpeg
-	echo "${MAKE-make}-ing prerequisite ffmpeg libraries" && \
-	( cd ./ffmpeg/ && \
-	./configure --cc=${CC} --enable-gpl ${ac_my_ffmpeg_cfg_lib_switch} --enable-pthreads --enable-swscale --disable-ffserver --disable-ffplay && \
-	ln -s libavcodec/avcodec.h ./ && \
-	ln -s libavcodec/dsputil.h ./ && \
-	ln -s libavformat/avformat.h ./ && \
-	ln -s libavformat/avio.h ./ && \
-	ln -s libavformat/rt*.h ./ && \
-	ln -s libavutil/common.h ./ && \
-	ln -s libavutil/avutil.h ./ && \
-	ln -s libavutil/mathematics.h ./ && \
-	ln -s libavutil/integer.h ./ && \
-	ln -s libavutil/intfloat_readwrite.h ./ && \
-	ln -s libavutil/rational.h ./ && \
-	ln -s libavutil/fifo.h ./ && \
-	ln -s libswscale/swscale.h ./ && \
-	ln -s libswscale/rgb2rgb.h ./ && \
-	ln -s libavdevice/avdevice.h ./ && \
-	${MAKE-make} )
-	# try to link it statically, or reset cache, set static_avcodec=no
-	top_srcdir=`pwd`
-	ac_my_ldflags_save=${LDFLAGS} ; LDFLAGS="${LDFLAGS} -L$top_srcdir/ffmpeg/libavcodec -L$top_srcdir/ffmpeg/libavformat -L$top_srcdir/ffmpeg/libavutil -L$top_srcdir/ffmpeg/libswscale -L$top_srcdir/ffmpeg/libavdevice"
-	ac_my_cflags_save=${CFLAGS} ; CFLAGS="${CFLAGS} -I $top_srcdir -I[$top_srcdir]/ffmpeg/libavcodec -I[$top_srcdir]/ffmpeg/libavformat -I[$top_srcdir]/ffmpeg/libavutil -I[$top_srcdir]/ffmpeg/libswscale -I[$top_srcdir]/ffmpeg/libavdevice"
-	AC_CHECK_LIB_STATIC(avutil, av_rescale,,[unset ac_cv_lib_avutil_av_rescale ; static_avcodec=no ; LDFLAGS=$ac_my_ldflags_save ; CFLAGS=$ac_my_cflags_save])
-fi
-
-# if still not found try to link dynamically
-if test x${ac_cv_lib_avutil_av_rescale+set} = x ; then
-	AC_CHECK_LIB(avutil, av_rescale)
-fi
-
-# if avutil is linked statically, swscale should, too
-static_swscale=$static_avutil
-ac_my_swscale_libs=""
-test x`(uname -s)` = xSunOS && ac_my_swscale_libs="-lnsl -lsocket"
-AC_CHECK_LIB_STATIC(swscale, sws_scale,,[unset ac_cv_lib_swscale_sws_scale ; static_swscale=no ; AC_CHECK_LIB(swscale, sws_scale,,,[$ac_my_swscale_libs])],[$ac_my_swscale_libs])
-
-# if avutil is linked statically, avcodec should, too
-static_avcodec=$static_avutil
-ac_my_avcodec_libs="-lz"
-test x`(uname -s)` = xSunOS && ac_my_avcodec_libs="-lz -lnsl -lsocket"
-AC_CHECK_LIB_STATIC(avcodec, avcodec_encode_video,,[unset ac_cv_lib_avcodec_avcodec_encode_video ; static_avcodec=no ; AC_CHECK_LIB(avcodec, avcodec_encode_video,,,[$ac_my_avcodec_libs])],[$ac_my_avcodec_libs])
-
-# if avcodec is linked statically, avformat should, too
-static_avformat=$static_avcodec
-ac_my_avformat_libs="-lz"
-test x`(uname -s)` = xSunOS && ac_my_avformat_libs="-lz -lnsl -lsocket"
-AC_CHECK_LIB_STATIC(avformat, av_write_header,,[unset ac_cv_lib_avformat_av_write_header ; static_avformat=no ; AC_CHECK_LIB(avformat, av_write_header,,,[$ac_my_avformat_libs])],[$ac_my_avformat_libs])
-
-# if avcodec is linked statically, avdevice should, too
-static_avdevice=$static_avcodec
-ac_my_avdevice_libs="-lz"
-test x`(uname -s)` = xSunOS && ac_my_avdevice_libs="-lz -lnsl -lsocket"
-AC_CHECK_LIB_STATIC(avdevice, avdevice_register_all,,[unset ac_cv_lib_avdevice_avdevice_register_all ; static_avdevice=no ; AC_CHECK_LIB(avdevice, avdevice_register_all,,,[$ac_my_avdevice_libs])],[$ac_my_avdevice_libs])
-
-# only use ffmpeg if ALL required libs are present
-if ( `test x$ac_cv_lib_avcodec_avcodec_encode_video = xyes -a x$ac_cv_lib_avformat_av_write_header = xyes -a x$ac_cv_lib_avutil_av_rescale = xyes -a x$ac_cv_lib_swscale_sws_scale = xyes -a x$ac_cv_lib_avdevice_avdevice_register_all = xyes` ) ; then
-    ac_cv_lib_avcodec_avcodec_encode_video=yes
-else
-    ac_cv_lib_avcodec_avcodec_encode_video=no
-fi
-
-#check for audio suport in FFMPEG (only if that is present in the first place)
-# thanks to Daniel Stonier for pointing out a typo and thus fixing a bug
-# with audio detection in shared library libavformat
-if ( test x${ac_cv_lib_avcodec_avcodec_encode_video} = xyes ) ; then
-	test x`(uname -s)` = xSunOS && ac_my_avcodec_libs="-lnsl -lsocket"
-	AC_CHECK_LIB_STATIC(avcodec, avcodec_decode_audio,[ac_my_have_ffmpeg_audio="1"],[unset ac_cv_lib_avcodec_avcodec_decode_audio ; AC_CHECK_LIB(avcodec, avcodec_decode_audio,[ac_my_have_ffmpeg_audio="1"],[ac_my_have_ffmpeg_audio="0"],[$ac_my_avcodec_libs])],[$ac_my_avcodec_libs])
-fi
-
-################################################################
-# which libs were found statically
-################################################################
-
-AM_CONDITIONAL(STATIC_AVFORMAT,[test x$static_avformat = xyes])
-AM_CONDITIONAL(STATIC_AVCODEC,[test x$static_avcodec = xyes])
-AM_CONDITIONAL(STATIC_AVUTIL,[test x$static_avutil = xyes])
-
-################################################################
-################################################################
+AC_CHECK_LIB(avutil, av_rescale,, [echo "You need FFMPEG"])
+AC_CHECK_LIB(swscale, sws_scale,, [echo "You need FFMPEG"])
+AC_CHECK_LIB(avcodec, avcodec_encode_video,, [echo "You need FFMPEG"])
+AC_CHECK_LIB(avformat, av_write_header,, [echo "You need FFMPEG"])
+AC_CHECK_LIB(avdevice, avdevice_register_all,, [echo "You need FFMPEG"])
+AC_CHECK_LIB(avcodec, avcodec_decode_audio,, [echo "You need FFMPEG"])
 
 
 ################################################################
@@ -462,9 +218,6 @@ if ( `test x${ac_cv_header_ctype_h} = xno` ) ; then
 	exit 1
 fi
 
-################################################################
-################################################################
-
 
 ################################################################
 ################################################################
@@ -473,9 +226,6 @@ fi
 
 AC_C_CONST
 AC_HEADER_TIME
-
-################################################################
-################################################################
 
 
 ################################################################
@@ -489,9 +239,6 @@ AC_FUNC_MMAP
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([fdatasync gettimeofday memmove memset munmap strcasecmp strchr strdup strstr getopt_long])
 
-################################################################
-################################################################
-
 
 ################################################################
 ################################################################
@@ -502,51 +249,9 @@ AM_CONDITIONAL(HAVE_GETOPT_LONG, test x$ac_cv_func_getopt_long = xyes)
 AM_CONDITIONAL(HAVE_MALLOC, test x$ac_cv_func_malloc_0_nonnull = xyes)
 AM_CONDITIONAL(HAVE_REALLOC, test x$ac_cv_func_realloc_0_nonnull = xyes)
 
-AM_CONDITIONAL(HAVE_FFMPEG_AUDIO,[test x${ac_my_have_ffmpeg_audio} = x1])
-
-AM_CONDITIONAL(USE_DBUS,[test x${ac_my_dbus_usable} = "xyes"])
 
 ################################################################
 ################################################################
-
-
-################################################################
-################################################################
-# generic preproc defines
-################################################################
-
-
-AH_TEMPLATE([USE_FFMPEG], [define if libavcodec is usable])
-test x${ac_cv_lib_avcodec_avcodec_encode_video} = "xyes" && AC_DEFINE([USE_FFMPEG], [1])
-AH_TEMPLATE([HAVE_SHMAT], [define if shared memory is available])
-test x${ac_cv_func_shmat} = "xyes" && AC_DEFINE([HAVE_SHMAT], [1])
-AH_TEMPLATE([LINUX], [define if building on Linux])
-test x${LINUX_TRUE} = "x" && AC_DEFINE([LINUX], [1])
-AH_TEMPLATE([SOLARIS], [define if building on Solaris])
-test x${SOLARIS_TRUE} = "x" && AC_DEFINE([SOLARIS], [1])
-AH_TEMPLATE([HPUX], [define if building on HP-UX])
-test x${HPUX_TRUE} = "x" && AC_DEFINE([HPUX], [1])
-AH_TEMPLATE([FREEBSD], [define if building on FreeBSD])
-test x${FREEBSD_TRUE} = "x" && AC_DEFINE([FREEBSD], [1])
-AH_TEMPLATE([u_int32_t], [Solaris has uint32_t])
-test x${SOLARIS_TRUE} = "x" && AC_DEFINE([u_int32_t], [uint32_t])
-AH_TEMPLATE([HAVE_FFMPEG_AUDIO], [this machine can support audio capture with ffmpeg])
-test x${HAVE_FFMPEG_AUDIO_TRUE} = "x" && AC_DEFINE([HAVE_FFMPEG_AUDIO], [1])
-AH_TEMPLATE([USE_XDAMAGE], [define if Xdamage and Xfixes are usable])
-test x${ac_cv_lib_Xdamage_XDamageSubtract} = "xyes" && 
-test x${ac_cv_lib_Xfixes_XFixesGetCursorImage} = "xyes" && 
-AC_DEFINE([USE_XDAMAGE], [1])
-AH_TEMPLATE([USE_DBUS], [define if libdbus-1 and libdbus-glib-1 are usable])
-test x${ac_my_dbus_usable} = "xyes" && AC_DEFINE([USE_DBUS], [1])
-AH_TEMPLATE([DISABLE_PATENTED], [define if patented codecs/file formats should be disabled])
-test x${ac_cv_enable_patented} = "xno" && AC_DEFINE([DISABLE_PATENTED], [1])
-
-################################################################
-################################################################
-
-
-
-
 
 AC_OUTPUT([
 doc/Makefile

@@ -1,11 +1,10 @@
 /**
- * \file app_data.c
- *
  * This file contains functions for manipulating the general data model used
  * by xvidcap. All user preferences are first stored in an XVC_AppData struct
  * which in turn contains two XVC_CapTypeOptions structs for storing information
  * related to the two modes of operation (single-frame capture and multi-frame
- * capture).<br>
+ * capture).
+ *
  * On start of a record session xvidcap creates a Job from this and keeps the
  * volatile state there. Also, some settings can be set to autodetect in
  * XVC_AppData and are only determined on creation of the Job to keep the
@@ -284,11 +283,9 @@ xvc_appdata_set_defaults (XVC_AppData * lapp)
     lapp->single_frame.frames = lapp->multi_frame.frames = 0;
 
     // the following two mean autodetect ...
-    lapp->single_frame.target = lapp->multi_frame.target = CAP_NONE;
-    lapp->single_frame.targetCodec = lapp->multi_frame.targetCodec = CODEC_NONE;
+    lapp->single_frame.targetCodec = lapp->multi_frame.targetCodec = VID_CODEC_NONE;
 
-    lapp->single_frame.au_targetCodec = lapp->multi_frame.au_targetCodec =
-        CODEC_NONE;
+    lapp->single_frame.au_targetCodec = lapp->multi_frame.au_targetCodec = AU_CODEC_NONE;
     lapp->single_frame.audioWanted = 0;
 
     lapp->multi_frame.audioWanted = 1;
@@ -383,7 +380,7 @@ xvc_appdata_copy (XVC_AppData * tapp, const XVC_AppData * sapp)
 }
 
 /**
- * \brief checks an XVC_AppData struct for consistency
+ * Checks an XVC_AppData struct for consistency
  *
  * @param lapp a pointer to the XVC_AppData struct to validate
  * @param mode toggles check for XVC_CapTypeOptions not currently active. mode = 0
@@ -395,27 +392,21 @@ xvc_appdata_copy (XVC_AppData * tapp, const XVC_AppData * sapp)
  *      This will be NULL if no errors were found.
  */
 XVC_ErrorListItem *
-xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
+xvc_appdata_validate(XVC_AppData *lapp, int mode, int *rc)
 {
     XVC_CapTypeOptions *target = NULL;
     XVC_ErrorListItem *errors = NULL;
-    int t_codec, t_format;
-
-    XVC_CapTypeOptions *non_target = NULL;
-
-    int t_au_codec;
 
     // we need current_mode determined by now
     if (lapp->current_mode < 0) {
         *rc = -1;
         return NULL;
     }
+	
     if (lapp->current_mode == 0) {
         target = &(lapp->single_frame);
-        non_target = &(lapp->multi_frame);
     } else {
         target = &(lapp->multi_frame);
-        non_target = &(lapp->single_frame);
     }
 
 	// flags related
@@ -461,18 +452,7 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
     }
     // end: source
 
-    // snddev needs to be checked from cap_type_options checks
-    // e.g. if target has audio enabled and snddev not accessible
-    // we throw an error ... nothing to check here, because we
-    // wouldn't know what to do, because we don't know if this is
-    // relevant for capturing
-
-    // help_cmd related ...
-    // no checks atm
-
-    // device related
-    // is V4L device which is checked for further up
-
+	
     // start: default_mode
     if (lapp->default_mode < 0 || lapp->default_mode > 1) {
         errors = errorlist_append (9, errors, lapp);
@@ -483,8 +463,8 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
     }
     // end: current_mode
 
-    // current_mode must be selected by now
 
+	
     // start: rescale
     if (lapp->rescale < 1 || lapp->rescale > 100) {
         errors = errorlist_append (37, errors, lapp);
@@ -495,16 +475,18 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
     }
     // end: rescale
 
+	
     /*
      * Now check target capture type options
      */
 
     // start: file
-    if (!target->file) {
-        errors =
-            errorlist_append ((lapp->current_mode == 0) ? 10 : 11, errors,
-                              lapp);
-        if (!errors) {
+    if (! target->file) {
+        errors = errorlist_append (
+		    (lapp->current_mode == 0) ? 10 : 11,
+		    errors,
+		    lapp);
+        if (! errors) {
             *rc = -1;
             return NULL;
         }
@@ -523,28 +505,13 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
             *rc = 1;
             return errors;
         } else {
-            if (target->target == CAP_NONE) {
-                // this is an empty filename string which signifies "ask
-                // the user" however we do not support "ask-user" and target
-                // auto-detect combined at this time ... so we change to
-                // default filename
-                errors = errorlist_append (13, errors, lapp);
-                if (!errors) {
-                    *rc = -1;
-                    return NULL;
-                }
-                *rc = 1;
-                return errors;
-            } else {
-                // this is "ask-user"
-                if ((lapp->flags & FLG_AUTO_CONTINUE) > 0)
+               if ((lapp->flags & FLG_AUTO_CONTINUE) > 0)
                     errors = errorlist_append (14, errors, lapp);
                 else
                     errors = errorlist_append (15, errors, lapp);
                 if (!errors) {
                     *rc = -1;
                     return NULL;
-                }
             }
 
         }
@@ -553,23 +520,37 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
 
     // start: target
     // first find auto-detection results if auto-detection is turned on
-    t_format = target->target;
-    t_codec = target->targetCodec;
-    if (!t_format)
-        t_format = xvc_codec_get_target_from_filename (target->file);
-    if (!t_codec)
-        t_codec = xvc_formats[t_format].def_vid_codec;
-    t_au_codec = target->au_targetCodec;
-    if (!t_au_codec)
-        t_au_codec = xvc_formats[t_format].def_au_codec;
+	if (! target->target) {
+        target->target = xvc_codec_get_target_from_filename(target->file);
+	}
 
-    // is target valid and does it match the current_mode?
-    // the next includes t_format == 0 ... which is at this stage an
-    // unresolved auto-detection
-    if (t_format <= CAP_NONE || t_format >= NUMCAPS) {
-        errors =
-            errorlist_append ((lapp->current_mode == 0) ? 16 : 17, errors,
-                              lapp);
+    if (! xvc_is_valid_format(target->target)) {
+        errors = errorlist_append(
+		    (lapp->current_mode == 0) ? 16 : 17,
+		    errors,
+		    lapp);
+        if (! errors) {
+            *rc = -1;
+            return NULL;
+        }
+        *rc = 1;
+        return errors;
+    }
+
+	// Now that the target is valid, we can set the video and audio default codecs
+    if (! target->targetCodec) {
+        target->targetCodec = xvc_formats[target->target].def_vid_codec;
+	}
+    if (! target->au_targetCodec)
+        target->au_targetCodec = xvc_formats[target->target].def_au_codec;
+
+
+	// Check video codec
+	if (! xvc_is_valid_video_codec(target->target, target->targetCodec)) {
+		errors = errorlist_append(
+			(lapp->current_mode == 0 ) ? 18 : 19,
+		    errors,
+			lapp);
         if (!errors) {
             *rc = -1;
             return NULL;
@@ -577,110 +558,25 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
         *rc = 1;
         return errors;
     }
-    else if (lapp->current_mode == 0 && t_format >= CAP_MF) {
-        errors = errorlist_append (18, errors, lapp);
-        if (!errors) {
-            *rc = -1;
-            return NULL;
-        }
-        *rc = 1;
-        return errors;
-    } else if (lapp->current_mode == 1 && t_format < CAP_MF) {
-        errors = errorlist_append (19, errors, lapp);
-        if (!errors) {
-            *rc = -1;
-            return NULL;
-        }
-        *rc = 1;
-        return errors;
-    }
-    // does targetCodec match the target
-    if (t_format < CAP_FFM && target->targetCodec != CODEC_NONE) {
-        errors = errorlist_append (20, errors, lapp);
-        if (!errors) {
-            *rc = -1;
-            return NULL;
-        }
-    }
 
-    if (target->target == CAP_NONE && target->targetCodec != CODEC_NONE) {
-        // if target is auto-detected we also want to auto-detect targetCodec
-        errors =
-            errorlist_append ((lapp->current_mode == 0) ? 21 : 22, errors,
-                              lapp);
-        if (!errors) {
-            *rc = -1;
-            return NULL;
-        }
-    }
-    else if (xvc_formats[t_format].num_allowed_vid_codecs > 0 &&
-             xvc_is_valid_video_codec (t_format, t_codec) == 0) {
-
-        errors = errorlist_append (23, errors, lapp);
-        if (!errors) {
-            *rc = -1;
-            return NULL;
-        }
-    }
-
-	// only check audio settings if audio capture is enabled
+	// Check audio codec (but only if audio capture is enabled)
     if (target->audioWanted == 1) {
-        if (t_format < CAP_FFM && target->au_targetCodec != CODEC_NONE) {
+		if (! xvc_is_valid_audio_codec(target->target, target->au_targetCodec)) {
             errors = errorlist_append (24, errors, lapp);
             if (!errors) {
                 *rc = -1;
                 return NULL;
             }
-        } else
-            if (target->target == CODEC_NONE
-                && target->au_targetCodec != CODEC_NONE) {
-            // if target is auto-detected we also want to auto-detect
-            // au_targetCodec
-            errors = errorlist_append (25, errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        } else if (xvc_formats[t_format].allowed_au_codecs &&
-                   xvc_is_valid_audio_codec (t_format, t_au_codec) == 0) {
-            errors = errorlist_append (26, errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        } else if (xvc_formats[t_format].allowed_au_codecs == NULL
-                   && target->audioWanted) {
-            errors =
-                errorlist_append ((lapp->current_mode == 0) ? 42 : 43,
-                                  errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
         }
     }
-
 	// end: target
-
-    // targetCodec ... check for suitable format is above with target
-
-    // au_targetCodec ... check for suitable format is above with target
 
     // start: fps
     if (lapp->current_mode == 1) {
         // if the fps is "almost" valid, find the valid fps and select it
-        if (xvc_codec_is_valid_fps (target->fps, t_codec, 1) == 0 &&
-            xvc_codec_is_valid_fps (target->fps, t_codec, 0) != 0) {
-            int fps_index =
-                xvc_get_index_of_fps_array_element (xvc_codecs[t_codec].
-                                                    num_allowed_fps,
-                                                    xvc_codecs[t_codec].
-                                                    allowed_fps,
-                                                    target->fps,
-                                                    0);
-
-            target->fps = xvc_codecs[t_codec].allowed_fps[fps_index];
-        } else if (xvc_codec_is_valid_fps (target->fps, t_codec, 1) == 0) {
+        if (xvc_codec_is_valid_fps (target->fps, target->targetCodec, 1) == 0 &&
+            xvc_codec_is_valid_fps (target->fps, target->targetCodec, 0) != 0) {
+        } else if (xvc_codec_is_valid_fps (target->fps, target->targetCodec, 1) == 0) {
             errors = errorlist_append (27, errors, lapp);
             if (!errors) {
                 *rc = -1;
@@ -699,9 +595,10 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
 
     // start: time
     if (target->time < 0) {
-        errors =
-            errorlist_append ((lapp->current_mode == 0) ? 29 : 30, errors,
-                              lapp);
+        errors = errorlist_append (
+		    (lapp->current_mode == 0) ? 29 : 30,
+		    errors,
+		    lapp);
         if (!errors) {
             *rc = -1;
             return NULL;
@@ -753,9 +650,10 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
 
     // start: quality
     if ((target->quality < 0) || (target->quality > 100)) {
-        errors =
-            errorlist_append ((lapp->current_mode == 0) ? 40 : 41, errors,
-                              lapp);
+        errors = errorlist_append (
+		    (lapp->current_mode == 0) ? 40 : 41,
+		    errors,
+		    lapp);
         if (!errors) {
             *rc = -1;
             return NULL;
@@ -770,337 +668,6 @@ xvc_appdata_validate (XVC_AppData * lapp, int mode, int *rc)
      * - int sndrate;                      // sound sample rate<br>
      * - int sndsize;                      // bits to sample for audio capture<br>
      */
-
-    // start: sndchannels
-
-	/*
-	// only check audio settings if audio capture is enabled
-    if (target->audioWanted == 1) {
-        if (target->au_targetCodec == AU_CODEC_VORBIS && target->sndchannels != 2) {
-            errors =
-                errorlist_append ((lapp->current_mode == 0) ? 38 : 39, errors,
-                                  lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        }
-	}
-	 */
-
-	// end: sndchannels
-
-    /**
-     * \todo can there be a meaningful check to validate the following?<br>
-     * - char *play_cmd;                   // command for animate function<br>
-     * - char *video_cmd;                  // command for make video function<br>
-     * - char *edit_cmd;                   // command for edit function<br>
-     */
-
-    // if we don't have FFMPEG, we can only have one capture type, i.e.
-    // the target
-    if (mode == 0) {
-        /*
-         * Now check non-target capture type options
-         */
-
-        // start: file
-        if (!non_target->file) {
-            errors =
-                errorlist_append ((lapp->current_mode == 1) ? 10 : 11,
-                                  errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-            *rc = 1;
-            return errors;
-        }
-
-        if (strlen (non_target->file) < 1) {
-            if (lapp->current_mode == 1) {
-                // single-frame capture does not know "ask-user"
-                errors = errorlist_append (12, errors, lapp);
-                if (!errors) {
-                    *rc = -1;
-                    return NULL;
-                }
-                *rc = 1;
-                return errors;
-            } else {
-                if (non_target->target == CAP_NONE) {
-                    // this is an empty filename string which signifies
-                    // "ask the user" however we do not support "ask-user" and
-                    // target auto-detect combined at this time ... so we
-                    // change to default filename
-                    errors = errorlist_append (13, errors, lapp);
-                    if (!errors) {
-                        *rc = -1;
-                        return NULL;
-                    }
-                    *rc = 1;
-                    return errors;
-                } else {
-                    // this is "ask-user"
-                    if ((lapp->flags & FLG_AUTO_CONTINUE) > 0)
-                        errors = errorlist_append (14, errors, lapp);
-                    else
-                        errors = errorlist_append (15, errors, lapp);
-                    if (!errors) {
-                        *rc = -1;
-                        return NULL;
-                    }
-                }
-
-            }
-        }
-        // end: file
-
-        // start: target
-        // first find auto-detection results if auto-detection is turned on
-        t_format = non_target->target;
-        t_codec = non_target->targetCodec;
-        if (!t_format)
-            t_format = xvc_codec_get_target_from_filename (non_target->file);
-        if (!t_codec)
-            t_codec = xvc_formats[t_format].def_vid_codec;
-
-        t_au_codec = non_target->au_targetCodec;
-        if (!t_au_codec)
-            t_au_codec = xvc_formats[t_format].def_au_codec;
-
-        // is target valid and does it match the current_mode?
-        // the next includes t_format == 0 ... which is at this stage an
-        // unresolved auto-detection
-        if (t_format <= CAP_NONE || t_format >= NUMCAPS) {
-            errors =
-                errorlist_append ((lapp->current_mode == 1) ? 16 : 17,
-                                  errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-            *rc = 1;
-            return errors;
-        } else if (lapp->current_mode == 1 && t_format >= CAP_FFM) {
-            errors = errorlist_append (18, errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-            *rc = 1;
-            return errors;
-        } else if (lapp->current_mode == 0 && t_format < CAP_FFM) {
-            errors = errorlist_append (19, errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-            *rc = 1;
-            return errors;
-        }
-        // does targetCodec match the target
-        if (t_format < CAP_FFM && non_target->targetCodec != CODEC_NONE) {
-            errors = errorlist_append (20, errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        }
-        if (non_target->target == CAP_NONE
-            && non_target->targetCodec != CODEC_NONE) {
-            // if target is auto-detected we also want to auto-detect
-            // targetCodec
-            errors =
-                errorlist_append ((lapp->current_mode == 1) ? 21 : 22,
-                                  errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        } else if (xvc_formats[t_format].allowed_vid_codecs &&
-                   xvc_is_valid_video_codec (t_format, t_codec) == 0) {
-
-            errors = errorlist_append (23, errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        }
-        // only check audio settings if audio capture is enabled
-        if (non_target->audioWanted == 1) {
-            // does au_targetCodec match target
-            if (t_format < CAP_FFM && non_target->au_targetCodec != CODEC_NONE) {
-                errors = errorlist_append (24, errors, lapp);
-                if (!errors) {
-                    *rc = -1;
-                    return NULL;
-                }
-            } else
-                if (non_target->target == CODEC_NONE
-                    && non_target->au_targetCodec != CODEC_NONE) {
-                // if target is auto-detected we also want to auto-detect
-                // au_targetCodec
-                errors = errorlist_append (25, errors, lapp);
-                if (!errors) {
-                    *rc = -1;
-                    return NULL;
-                }
-            } else if (xvc_formats[t_format].allowed_au_codecs &&
-                       xvc_is_valid_audio_codec (t_format, t_au_codec) == 0) {
-                errors = errorlist_append (26, errors, lapp);
-                if (!errors) {
-                    *rc = -1;
-                    return NULL;
-                }
-            } else if (xvc_formats[t_format].allowed_au_codecs == NULL
-                       && non_target->audioWanted) {
-                errors =
-                    errorlist_append ((lapp->current_mode == 1) ? 42 : 43,
-                                      errors, lapp);
-                if (!errors) {
-                    *rc = -1;
-                    return NULL;
-                }
-            }
-        }
-        // end: target
-
-        // targetCodec ... check for suitable format is above with target
-
-        // au_targetCodec ... check for suitable format is above with target
-
-        // start: fps
-        if (lapp->current_mode == 0) {
-            // if the fps is "almost" valid, find the valid fps and select it
-            if (xvc_codec_is_valid_fps (non_target->fps, t_codec, 1) == 0 &&
-                xvc_codec_is_valid_fps (non_target->fps, t_codec, 0) != 0) {
-                int fps_index =
-                    xvc_get_index_of_fps_array_element (xvc_codecs[t_codec].
-                                                        num_allowed_fps,
-                                                        xvc_codecs[t_codec].
-                                                        allowed_fps,
-                                                        non_target->fps,
-                                                        0);
-
-                non_target->fps = xvc_codecs[t_codec].allowed_fps[fps_index];
-            } else if (xvc_codec_is_valid_fps (non_target->fps, t_codec, 1) ==
-                       0) {
-                errors = errorlist_append (27, errors, lapp);
-                if (!errors) {
-                    *rc = -1;
-                    return NULL;
-                }
-            }
-        } else if (lapp->current_mode == 1 &&
-                   !XVC_FPS_GT_ZERO (non_target->fps)) {
-            errors = errorlist_append (28, errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        }
-        // end: fps
-
-        // start: time
-        if (non_target->time < 0) {
-            errors =
-                errorlist_append ((lapp->current_mode == 1) ? 29 : 30,
-                                  errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        }
-        // end: time
-
-        // start: frames
-        if (non_target->time < 0) {
-            errors =
-                errorlist_append ((lapp->current_mode == 1) ? 31 : 32,
-                                  errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        }
-        // end: frames
-
-        // start: start_no
-        if (non_target->start_no < 0) {
-            errors =
-                errorlist_append ((lapp->current_mode == 1) ? 33 : 34,
-                                  errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        }
-        // end: start_no
-
-        // start: step
-        if (non_target->step <= 0) {
-            errors =
-                errorlist_append ((lapp->current_mode == 1) ? 35 : 36,
-                                  errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        } else if (lapp->current_mode == 0 && non_target->step != 1) {
-            errors = errorlist_append (36, errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        }
-        // end: step
-
-        // start: quality
-        if ((non_target->quality < 0) || (non_target->quality > 100)) {
-            errors =
-                errorlist_append ((lapp->current_mode == 1) ? 40 : 41,
-                                  errors, lapp);
-            if (!errors) {
-                *rc = -1;
-                return NULL;
-            }
-        }
-        // end: quality
-
-        // audioWanted is checked with target
-
-        /**
-         * \todo implement some sanity checks if possible<br>
-         * - int sndrate;                      // sound sample rate<br>
-         * - int sndsize;                      // bits to sample for audio capture<br>
-         */
-        // start: sndchannels
-        // only check audio settings if audio capture is enabled
-        if (non_target->audioWanted == 1) {
-			/*
-            if (non_target->au_targetCodec == AU_CODEC_VORBIS
-                && non_target->sndchannels != 2) {
-                errors =
-                    errorlist_append ((lapp->current_mode == 1) ? 38 : 39,
-                                      errors, lapp);
-                if (!errors) {
-                    *rc = -1;
-                    return NULL;
-                }
-            }
-			 */
-        }
-        // end: sndchannels
-
-        /**
-         * \todo can there be a meaningful check to validate the following?<br>
-         * - char *play_cmd;                   // command for animate function<br>
-         * - char *video_cmd;                  // command for make video function<br>
-         * - char *edit_cmd;                   // command for edit function<br>
-         */
-
-    }
 
     if (errors)
         *rc = 1;
@@ -1274,7 +841,7 @@ error_12_action (XVC_ErrorListItem * err)
     else
         target = &(err->app->multi_frame);
 
-    if (target->target > 0 && target->target < NUMCAPS) {
+	if (xvc_is_valid_format(target->target)) {
         char tmp_fn[512];
         const char *extension = xvc_formats[target->target].extensions[0];
 

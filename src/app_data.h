@@ -1,7 +1,3 @@
-/**
- * \file app_data.h
- */
-
 /*
  * Copyright (C) 1997 Rasca Gmelch, Berlin
  * Copyright (C) 2003-2007 Karl H. Beckers, Frankfurt
@@ -29,12 +25,11 @@
 #endif
 
 #include <X11/Intrinsic.h>
+#include <pthread.h>
 #include "codecs.h"
 #include "dbus-server-object.h"
+#include "macros.h"
 
-#define XVC_MAX(a,b) ((a)>(b)? (a):(b))
-#define XVC_MIN(a,b) ((a)<(b)? (a):(b))
-#define XVC_GLADE_FILE PACKAGE_DATA_DIR"/xvidcap/glade/gnome-xvidcap.glade"
 
 /*
  * some flags to toggle on/off options

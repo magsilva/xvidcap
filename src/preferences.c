@@ -19,7 +19,7 @@
  *
  */
 
-#include "options.h"
+#include "preferences.h"
 
 /**
  * Saves the preferences to file.

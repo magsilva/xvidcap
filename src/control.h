@@ -1,6 +1,4 @@
 /**
- * \file control.h
- *
  * This file contains a number of general purpose functions which are
  * always needed regardless of the GUI implementation. They will be implemented
  * in one of the gnome_* files.
@@ -30,7 +28,7 @@
 
 #include <X11/Intrinsic.h>
 #include "xvc_error_item.h"
-#include "options.h"
+#include "preferences.h"
 
 // the following defines the xvc interface for UIs
 // they need to be implemented by any GUI anybody wants to add in the

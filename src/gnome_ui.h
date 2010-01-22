@@ -1,6 +1,3 @@
-/**
- * \file gnome_ui.h
- */
 /*
  * Copyright (C) 2003-07 Karl H. Beckers, Frankfurt
  * EMail: khb@jarre-de-the.net

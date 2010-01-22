@@ -1,6 +1,4 @@
 /**
- * \file capture.c
- *
  * This file contains routines used for capturing individual frames.
  * Theese routines are called from the capture thread spawned on start of
  * a capture session. Once started the capture is completely governed by
@@ -80,6 +78,20 @@ static unsigned char bottom[65536];
     the next frame to find it. This is only required in the context
     of Xdamage */
 static XRectangle pointer_area;
+
+/**
+ * \brief since the capture functions have been merged, we need a way for the
+ *      commonCapture() function to distinguish between the possible sources.
+ */
+enum captureFunctions
+{
+    /** \brief plain X11 */
+    X11,
+    /** \brief X11 with SHM extension */
+    SHM,
+    /** \brief element counter */
+    NUMFUNCTIONS
+};
 
 /**
  * Find out where the mouse pointer is
@@ -1279,24 +1291,12 @@ commonCapture (enum captureFunctions capfunc)
     return time;
 }
 
-/**
- * \brief function used for capturing. This one is used with source = x11,
- *      i. e. when capturing from X11 display w/o SHM
- *
- * @return the number of msecs in which the next capture is due
- */
 long
 xvc_capture_x11 ()
 {
     return commonCapture(X11);
 }
 
-/**
- * \brief function used for capturing. This one is used with source = shm,
- *      i. e. when capturing from X11 with SHM support
- *
- * @return the number of msecs in which the next capture is due
- */
 long
 xvc_capture_shm ()
 {

@@ -1416,7 +1416,7 @@ msgstr "%s %s: can't create selection Frame ... aborting\n"
 msgid "%s %s: can't initialize GUI ... aborting\n"
 msgstr "%s %s: can't initialize GUI ... aborting\n"
 
-#: ../src/options.c:70
+#: ../src/preferences.c:70
 #, c-format
 msgid ""
 "#\n"
@@ -1428,27 +1428,27 @@ msgstr ""
 "\n"
 
 #. general options
-#: ../src/options.c:73
+#: ../src/preferences.c:73
 #, c-format
 msgid "#general options ...\n"
 msgstr "#general options ...\n"
 
-#: ../src/options.c:75
+#: ../src/preferences.c:75
 #, c-format
 msgid "# default capture mode (0 = single-frame, 1 = multi-frame)\n"
 msgstr "# default capture mode (0 = single-frame, 1 = multi-frame)\n"
 
-#: ../src/options.c:82
+#: ../src/preferences.c:82
 #, c-format
 msgid "# capture source\n"
 msgstr "# capture source\n"
 
-#: ../src/options.c:86
+#: ../src/preferences.c:86
 #, c-format
 msgid "# take screenshots using the XDamage extension for efficiency.\n"
 msgstr "# take screenshots using the XDamage extension for efficiency.\n"
 
-#: ../src/options.c:89
+#: ../src/preferences.c:89
 #, c-format
 msgid ""
 "# this does not work well for 3D compositing window managers like compiz or "
@@ -1457,14 +1457,14 @@ msgstr ""
 "# this does not work well for 3D compositing window managers like compiz or "
 "beryl.\n"
 
-#: ../src/options.c:92
+#: ../src/preferences.c:92
 #, c-format
 msgid ""
 "# therefore xvidcap disables this by default for those window managers.\n"
 msgstr ""
 "# therefore xvidcap disables this by default for those window managers.\n"
 
-#: ../src/options.c:95
+#: ../src/preferences.c:95
 #, c-format
 msgid ""
 "# set this to \"-1\" for auto-detection, \"0\" for disabled, or \"1\" for "
@@ -1473,22 +1473,22 @@ msgstr ""
 "# set this to \"-1\" for auto-detection, \"0\" for disabled, or \"1\" for "
 "enabled.\n"
 
-#: ../src/options.c:97
+#: ../src/preferences.c:97
 #, c-format
 msgid "# hide GUI\n"
 msgstr "# hide GUI\n"
 
-#: ../src/options.c:99
+#: ../src/preferences.c:99
 #, c-format
 msgid "# hide frame around capture area\n"
 msgstr "# hide frame around capture area\n"
 
-#: ../src/options.c:102
+#: ../src/preferences.c:102
 #, c-format
 msgid "# device to grab audio from\n"
 msgstr "# device to grab audio from\n"
 
-#: ../src/options.c:108
+#: ../src/preferences.c:108
 #, c-format
 msgid ""
 "# what kind of mouse pointer should be recorded? 0 = none, 1 = white, 2 = "
@@ -1497,47 +1497,47 @@ msgstr ""
 "# what kind of mouse pointer should be recorded? 0 = none, 1 = white, 2 = "
 "black\n"
 
-#: ../src/options.c:110
+#: ../src/preferences.c:110
 #, c-format
 msgid "# should cap_geometry be saved to prefs?\n"
 msgstr "# should cap_geometry be saved to prefs?\n"
 
-#: ../src/options.c:114
+#: ../src/preferences.c:114
 #, c-format
 msgid "# area to capture as in --capture_geometry\n"
 msgstr "# area to capture as in --capture_geometry\n"
 
-#: ../src/options.c:122
+#: ../src/preferences.c:122
 #, c-format
 msgid "# locked frame follows mouse not window\n"
 msgstr "# locked frame follows mouse not window\n"
 
-#: ../src/options.c:126
+#: ../src/preferences.c:126
 #, c-format
 msgid "# show time rather than frame count\n"
 msgstr "# show time rather than frame count\n"
 
-#: ../src/options.c:129
+#: ../src/preferences.c:129
 #, c-format
 msgid "# toggle autocontinue (0/1) \n"
 msgstr "# toggle autocontinue (0/1) \n"
 
-#: ../src/options.c:132
+#: ../src/preferences.c:132
 #, c-format
 msgid "# always show results dialog (0/1)\n"
 msgstr "# always show results dialog (0/1)\n"
 
-#: ../src/options.c:136
+#: ../src/preferences.c:136
 #, c-format
 msgid "# rescale the captured area to n percent of the original\n"
 msgstr "# rescale the captured area to n percent of the original\n"
 
-#: ../src/options.c:140
+#: ../src/preferences.c:140
 #, c-format
 msgid "# minimize the main control to the system tray while recording\n"
 msgstr "# minimize the main control to the system tray while recording\n"
 
-#: ../src/options.c:144
+#: ../src/preferences.c:144
 #, c-format
 msgid ""
 "\n"
@@ -1546,7 +1546,7 @@ msgstr ""
 "\n"
 "#options for single-frame capture ...\n"
 
-#: ../src/options.c:147 ../src/options.c:246
+#: ../src/preferences.c:147 ../src/preferences.c:246
 #, c-format
 msgid ""
 "# file pattern\n"
@@ -1555,33 +1555,33 @@ msgstr ""
 "# file pattern\n"
 "# this defines the filetype to write via the extension provided\n"
 
-#: ../src/options.c:148 ../src/options.c:247
+#: ../src/preferences.c:148 ../src/preferences.c:247
 #, c-format
 msgid "# valid extensions are: "
 msgstr "# valid extensions are: "
 
-#: ../src/options.c:172 ../src/options.c:260
+#: ../src/preferences.c:172 ../src/preferences.c:260
 #, c-format
 msgid "# file format - use AUTO to select format through file extension\n"
 msgstr "# file format - use AUTO to select format through file extension\n"
 
-#: ../src/options.c:173 ../src/options.c:193 ../src/options.c:261
-#: ../src/options.c:272 ../src/options.c:283
+#: ../src/preferences.c:173 ../src/preferences.c:193 ../src/preferences.c:261
+#: ../src/preferences.c:272 ../src/preferences.c:283
 #, c-format
 msgid "# Otherwise specify one of the following: "
 msgstr "# Otherwise specify one of the following: "
 
-#: ../src/options.c:192 ../src/options.c:271
+#: ../src/preferences.c:192 ../src/preferences.c:271
 #, c-format
 msgid "# video codec used by ffmpeg - use AUTO to auto-detect codec\n"
 msgstr "# video codec used by ffmpeg - use AUTO to auto-detect codec\n"
 
-#: ../src/options.c:210
+#: ../src/preferences.c:210
 #, c-format
 msgid "# audio codec (for future use)\n"
 msgstr "# audio codec (for future use)\n"
 
-#: ../src/options.c:214 ../src/options.c:296
+#: ../src/preferences.c:214 ../src/preferences.c:296
 #, c-format
 msgid ""
 "# frames per second\n"
@@ -1590,62 +1590,62 @@ msgstr ""
 "# frames per second\n"
 "# put as normal decimal number or a fraction like \"30000/10001\"\n"
 
-#: ../src/options.c:217 ../src/options.c:299
+#: ../src/preferences.c:217 ../src/preferences.c:299
 #, c-format
 msgid "# max time (0 = unlimited)\n"
 msgstr "# max time (0 = unlimited)\n"
 
-#: ../src/options.c:219 ../src/options.c:301
+#: ../src/preferences.c:219 ../src/preferences.c:301
 #, c-format
 msgid "# max frames (0 = unlimited)\n"
 msgstr "# max frames (0 = unlimited)\n"
 
-#: ../src/options.c:221
+#: ../src/preferences.c:221
 #, c-format
 msgid "# number to start counting individual frames from\n"
 msgstr "# number to start counting individual frames from\n"
 
-#: ../src/options.c:223 ../src/options.c:307
+#: ../src/preferences.c:223 ../src/preferences.c:307
 #, c-format
 msgid "# quality (JPEG/MPEG)\n"
 msgstr "# quality (JPEG/MPEG)\n"
 
-#: ../src/options.c:225
+#: ../src/preferences.c:225
 #, c-format
 msgid "# toggle audio capture (0/1) (for future use)\n"
 msgstr "# toggle audio capture (0/1) (for future use)\n"
 
-#: ../src/options.c:227
+#: ../src/preferences.c:227
 #, c-format
 msgid "# sample rate for audio capture (for future use)\n"
 msgstr "# sample rate for audio capture (for future use)\n"
 
-#: ../src/options.c:229
+#: ../src/preferences.c:229
 #, c-format
 msgid "# bit rate for audio capture (for future use)\n"
 msgstr "# bit rate for audio capture (for future use)\n"
 
-#: ../src/options.c:233
+#: ../src/preferences.c:233
 #, c-format
 msgid "# number of channels to use in audio capture (for future use)\n"
 msgstr "# number of channels to use in audio capture (for future use)\n"
 
-#: ../src/options.c:235 ../src/options.c:320
+#: ../src/preferences.c:235 ../src/preferences.c:320
 #, c-format
 msgid "# command to display captured frames as animation\n"
 msgstr "# command to display captured frames as animation\n"
 
-#: ../src/options.c:237
+#: ../src/preferences.c:237
 #, c-format
 msgid "# command to edit current frame\n"
 msgstr "# command to edit current frame\n"
 
-#: ../src/options.c:239
+#: ../src/preferences.c:239
 #, c-format
 msgid "# command to encode captured frames\n"
 msgstr "# command to encode captured frames\n"
 
-#: ../src/options.c:243
+#: ../src/preferences.c:243
 #, c-format
 msgid ""
 "\n"
@@ -1654,47 +1654,47 @@ msgstr ""
 "\n"
 "#options for multi-frame capture ...\n"
 
-#: ../src/options.c:282
+#: ../src/preferences.c:282
 #, c-format
 msgid "# audio codec used by ffmpeg - use AUTO to auto-detect audio codec\n"
 msgstr "# audio codec used by ffmpeg - use AUTO to auto-detect audio codec\n"
 
-#: ../src/options.c:305
+#: ../src/preferences.c:305
 #, c-format
 msgid "# number to start counting individual frames from (for future use)\n"
 msgstr "# number to start counting individual frames from (for future use)\n"
 
-#: ../src/options.c:310
+#: ../src/preferences.c:310
 #, c-format
 msgid "# toggle audio capture (0/1)\n"
 msgstr "# toggle audio capture (0/1)\n"
 
-#: ../src/options.c:313
+#: ../src/preferences.c:313
 #, c-format
 msgid "# sample rate for audio capture\n"
 msgstr "# sample rate for audio capture\n"
 
-#: ../src/options.c:315
+#: ../src/preferences.c:315
 #, c-format
 msgid "# bit rate for audio capture\n"
 msgstr "# bit rate for audio capture\n"
 
-#: ../src/options.c:317
+#: ../src/preferences.c:317
 #, c-format
 msgid "# number of channels to use in audio capture\n"
 msgstr "# number of channels to use in audio capture\n"
 
-#: ../src/options.c:322
+#: ../src/preferences.c:322
 #, c-format
 msgid "# command to edit current movie\n"
 msgstr "# command to edit current movie\n"
 
-#: ../src/options.c:325
+#: ../src/preferences.c:325
 #, c-format
 msgid "# command to encode captured frames (subject to change)\n"
 msgstr "# command to encode captured frames (subject to change)\n"
 
-#: ../src/options.c:430
+#: ../src/preferences.c:430
 #, c-format
 msgid ""
 "reading unsupported GUI preferences from options file\n"
@@ -1703,7 +1703,7 @@ msgstr ""
 "reading unsupported GUI preferences from options file\n"
 "resetting to GUI not hidden\n"
 
-#: ../src/options.c:441
+#: ../src/preferences.c:441
 #, c-format
 msgid ""
 "reading unsupported noframe preferences from options file\n"
@@ -1712,7 +1712,7 @@ msgstr ""
 "reading unsupported noframe preferences from options file\n"
 "resetting to frame not hidden\n"
 
-#: ../src/options.c:460
+#: ../src/preferences.c:460
 #, c-format
 msgid ""
 "reading unsupported save_geometry preferences from options file\n"
@@ -1721,7 +1721,7 @@ msgstr ""
 "reading unsupported save_geometry preferences from options file\n"
 "resetting to capture geometry not saved\n"
 
-#: ../src/options.c:471
+#: ../src/preferences.c:471
 #, c-format
 msgid ""
 "reading unsupported follow_mouse preferences from options file\n"
@@ -1730,7 +1730,7 @@ msgstr ""
 "reading unsupported follow_mouse preferences from options file\n"
 "resetting lock to follow control window\n"
 
-#: ../src/options.c:487
+#: ../src/preferences.c:487
 #, c-format
 msgid ""
 "reading unsupported show_time value from options file\n"
@@ -1739,7 +1739,7 @@ msgstr ""
 "reading unsupported show_time value from options file\n"
 "resetting to display frame counter\n"
 
-#: ../src/options.c:498
+#: ../src/preferences.c:498
 #, c-format
 msgid ""
 "reading unsupported auto_continue value from options file\n"
@@ -1748,7 +1748,7 @@ msgstr ""
 "reading unsupported auto_continue value from options file\n"
 "resetting to autocontinue enabled.\n"
 
-#: ../src/options.c:509
+#: ../src/preferences.c:509
 #, c-format
 msgid ""
 "reading unsupported always_show_results value from options file\n"
@@ -1757,7 +1757,7 @@ msgstr ""
 "reading unsupported always_show_results value from options file\n"
 "resetting to always show results.\n"
 
-#: ../src/options.c:523
+#: ../src/preferences.c:523
 #, c-format
 msgid ""
 "reading unsupported minimize_to_tray value from options file\n"
@@ -1766,7 +1766,7 @@ msgstr ""
 "reading unsupported minimize_to_tray value from options file\n"
 "resetting to not minimizing to tray.\n"
 
-#: ../src/options.c:614
+#: ../src/preferences.c:614
 #, c-format
 msgid ""
 "reading unsupported target from options file\n"
@@ -1775,7 +1775,7 @@ msgstr ""
 "reading unsupported target from options file\n"
 "resetting to target auto-detection\n"
 
-#: ../src/options.c:631
+#: ../src/preferences.c:631
 #, c-format
 msgid ""
 "reading unsupported target codec (%i) from options file\n"
@@ -1784,7 +1784,7 @@ msgstr ""
 "reading unsupported target codec (%i) from options file\n"
 "resetting to codec auto-detection\n"
 
-#: ../src/options.c:650
+#: ../src/preferences.c:650
 #, c-format
 msgid ""
 "reading unsupported target audio codec (%i) from options file\n"
@@ -1793,12 +1793,12 @@ msgstr ""
 "reading unsupported target audio codec (%i) from options file\n"
 "resetting to audio codec auto-detection\n"
 
-#: ../src/options.c:685
+#: ../src/preferences.c:685
 #, c-format
 msgid "Invalid parameter 'audio: %s' in preferences file\n"
 msgstr "Invalid parameter 'audio: %s' in preferences file\n"
 
-#: ../src/options.c:689
+#: ../src/preferences.c:689
 #, c-format
 msgid "Disabling audio capture unless overridden by command line\n"
 msgstr "Disabling audio capture unless overridden by command line\n"

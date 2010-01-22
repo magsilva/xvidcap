@@ -1,8 +1,5 @@
 /**
- * \file gnome_ui.c
- *
  * This file contains the main control UI for xvidcap
- * \todo rename the global variables pthread* to xvc_pthread*
  */
 
 /* Copyright (C) 2003-07 Karl H. Beckers, Frankfurt
@@ -24,32 +21,22 @@
  *
  *
  */
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+#include <config.h>
 #endif
 
-#define DEBUGFILE "gnome_ui.c"
-#endif     // DOXYGEN_SHOULD_SKIP_THIS
-
-#include <sys/time.h>                  // for timeval struct and related
+#include <sys/time.h>
 #include <sys/poll.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifdef SOLARIS
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#endif     // SOLARIS
 #include <X11/cursorfont.h>
 #include <X11/Xmu/WinUtil.h>
 #include <X11/Xatom.h>
 
-#ifdef USE_XDAMAGE
 #include <X11/extensions/Xfixes.h>
 #include <X11/extensions/Xdamage.h>
 #include <X11/Xproto.h>
-#endif     // USE_XDAMAGE
 
 #include <glib.h>
 #include <gdk/gdkx.h>
@@ -75,10 +62,8 @@
 /*
  * globals
  */
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern GtkWidget *xvc_pref_main_window;
 extern GtkWidget *xvc_warn_main_window;
-#endif     // DOXYGEN_SHOULD_SKIP_THIS
 
 /** \brief make error numbers accessible */
 extern int errno;
@@ -181,7 +166,6 @@ GtkWidget *
 glade_create_led_meter (gchar * widget_name, gchar * string1,
                         gchar * string2, gint int1, gint int2)
 {
-#define DEBUGFUNCTION "glade_create_led_meter()"
     GtkWidget *frame_monitor = led_meter_new ();
 
     g_assert (frame_monitor);
@@ -190,7 +174,6 @@ glade_create_led_meter (gchar * widget_name, gchar * string1,
     gtk_widget_show (GTK_WIDGET (frame_monitor));
 
     return frame_monitor;
-#undef DEBUGFUNCTION
 }
 
 /*
@@ -208,7 +191,6 @@ glade_create_led_meter (gchar * widget_name, gchar * string1,
 void
 GtkChangeLabel (int pic_no)
 {
-#define DEBUGFUNCTION "GtkChangeLabel()"
     static char file[PATH_MAX + 1], tmp_buf[PATH_MAX + 1];
     PangoLayout *layout = NULL;
     gint width = 0, height = 0;
@@ -256,7 +238,6 @@ GtkChangeLabel (int pic_no)
     g_object_unref (layout);
 
     gtk_widget_set_size_request (GTK_WIDGET (w), (width + 30), -1);
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -267,10 +248,6 @@ GtkChangeLabel (int pic_no)
 void
 warning_submit ()
 {
-#define DEBUGFUNCTION "warning_submit()"
-#ifdef DEBUG
-    printf ("%s %s: Entering\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
     XVC_AppData *app = xvc_appdata_ptr ();
 
     xvc_job_set_from_app_data (app);
@@ -282,20 +259,13 @@ warning_submit ()
     }
 
     if (xvc_errorlist_delete (errors_after_cli)) {
-        fprintf (stderr,
-                 "%s %s: Unrecoverable error while freeing error list, please contact the xvidcap project.\n",
-                 DEBUGFILE, DEBUGFUNCTION);
+        fprintf (stderr,"Unrecoverable error while freeing error list, please contact the xvidcap project.\n");
         exit (1);
     }
     // reset attempts so warnings will be shown again next time ...
     OK_attempts = 0;
 
     // when starting, we are ready for remote commands via dbus after this
-
-#ifdef DEBUG
-    printf ("%s %s: Leaving\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -306,7 +276,6 @@ warning_submit ()
 void
 xvc_get_ctrl_frame_extents (GdkWindow * window, GdkRectangle * rect)
 {
-#define DEBUGFUNCTION "get_frame_extents()"
     XVC_AppData *app = xvc_appdata_ptr ();
     Window xwindow;
     Atom type_return;
@@ -340,9 +309,7 @@ xvc_get_ctrl_frame_extents (GdkWindow * window, GdkRectangle * rect)
                                 (unsigned char **) ((void *)
                                                     &wm_child))
             != Success) {
-            fprintf (stderr,
-                     "%s %s: Error while trying to get a window to identify the window manager.\n",
-                     DEBUGFILE, DEBUGFUNCTION);
+            fprintf (stderr, "Error while trying to get a window to identify the window manager.\n");
         }
         if ((wm_child == NULL) ||
             (XGetWindowProperty
@@ -351,15 +318,9 @@ xvc_get_ctrl_frame_extents (GdkWindow * window, GdkRectangle * rect)
               (unsigned char **) ((void *)
                                   &wm_name_str))
              != Success)) {
-            fprintf (stderr,
-                     "%s %s: Warning!!!\nYour window manager appears to be non-compliant!\n",
-                     DEBUGFILE, DEBUGFUNCTION);
+            fprintf (stderr, "Warning!!!\nYour window manager appears to be non-compliant!\n");
         }
     }
-#if DEBUG
-    printf ("%s %s: Your window manager is: %s\n",
-            DEBUGFILE, DEBUGFUNCTION, wm_name_str);
-#endif     // DEBUG
 
     // Right now only wm's that I know of performing 3d compositing
     // are beryl and compiz. names can be compiz for compiz and
@@ -389,11 +350,6 @@ xvc_get_ctrl_frame_extents (GdkWindow * window, GdkRectangle * rect)
                     rect->y = wy;
                     rect->width = ww;
                     rect->height = wh;
-#if DEBUG
-                    printf
-                        ("%s %s: got wx %i wy %i, ww %i, wh %i, wb %i, wd %i\n",
-                         DEBUGFILE, DEBUGFUNCTION, wx, wy, ww, wh, wb, wd);
-#endif     // DEBUG
                 }
 
                 /* _NET_FRAME_EXTENTS format is left, right, top, bottom */
@@ -401,23 +357,11 @@ xvc_get_ctrl_frame_extents (GdkWindow * window, GdkRectangle * rect)
                 rect->y -= ldata[2];
                 rect->width += ldata[0] + ldata[1];
                 rect->height += ldata[2] + ldata[3];
-#if DEBUG
-                printf ("%s %s: got x %i y %i w %i h %i \n",
-                        DEBUGFILE, DEBUGFUNCTION, ldata[0], ldata[2],
-                        ldata[0] + ldata[1], ldata[2] + ldata[3]);
-#endif     // DEBUG
             }
 
             if (data)
                 XFree (data);
         }
-#if DEBUG
-        printf
-            ("%s %s: got XA_CARDINAL %i, format %i, nitems %li, bytes %li, data %p\n",
-             DEBUGFILE, DEBUGFUNCTION, (type_return == XA_CARDINAL ? 1 : 0),
-             format_return, nitems_return, bytes_after_return, data);
-#endif     // DEBUG
-
         if (wm_name_str)
             XFree (wm_name_str);
     }
@@ -425,10 +369,8 @@ xvc_get_ctrl_frame_extents (GdkWindow * window, GdkRectangle * rect)
     if (got_frame_extents == FALSE) {
         gdk_window_get_frame_extents (window, rect);
     }
-#undef DEBUGFUNCTION
 }
 
-#ifdef USE_FFMPEG
 /**
  * \brief this toggles the type of capture (sf vs. mf) currently active
  *
@@ -438,7 +380,6 @@ xvc_get_ctrl_frame_extents (GdkWindow * window, GdkRectangle * rect)
 void
 xvc_toggle_cap_type ()
 {
-#define DEBUGFUNCTION "xvc_toggle_cap_type()"
     int count_non_info_messages, rc;
     XVC_AppData *app = xvc_appdata_ptr ();
 
@@ -447,9 +388,7 @@ xvc_toggle_cap_type ()
     errors_after_cli = xvc_appdata_validate (app, 1, &rc);
 
     if (rc == -1) {
-        fprintf (stderr,
-                 "%s %s: Unrecoverable error while validating options, please contact the xvidcap project.\n",
-                 DEBUGFILE, DEBUGFUNCTION);
+        fprintf (stderr, "Unrecoverable error while validating options, please contact the xvidcap project.\n");
         exit (1);
     }
     // warning dialog
@@ -472,7 +411,6 @@ xvc_toggle_cap_type ()
     } else {
         warning_submit ();
     }
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -485,7 +423,6 @@ xvc_toggle_cap_type ()
 void
 xvc_undo_toggle_cap_type ()
 {
-#define DEBUGFUNCTION "xvc_undo_toggle_cap_type()"
     GladeXML *xml = NULL;
     GtkWidget *mitem = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
@@ -495,17 +432,7 @@ xvc_undo_toggle_cap_type ()
 
     OK_attempts = 0;
 
-#ifdef DEBUG
-    printf ("%s %s: pre current_mode %i\n", DEBUGFILE, DEBUGFUNCTION,
-            app->current_mode);
-#endif     // DEBUG
-
     app->current_mode = (app->current_mode == 0) ? 1 : 0;
-
-#ifdef DEBUG
-    printf ("%s %s: post current_mode %i\n", DEBUGFILE, DEBUGFUNCTION,
-            app->current_mode);
-#endif     // DEBUG
 
     if (app->current_mode == 0) {
         mitem = glade_xml_get_widget (xml, "xvc_ctrl_m1_mitem_sf_capture");
@@ -516,12 +443,8 @@ xvc_undo_toggle_cap_type ()
         g_assert (mitem);
         gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (mitem), TRUE);
     }
-
-#undef DEBUGFUNCTION
 }
-#endif     // USE_FFMPEG
 
-#ifdef USE_XDAMAGE
 /**
  * \brief event filter to register with gdk to retrieve X11 events
  *
@@ -630,7 +553,6 @@ xvc_xdamage_event_filter (GdkXEvent * xevent, GdkEvent * event, void *user_data)
 
     return GDK_FILTER_CONTINUE;
 }
-#endif     // USE_XDAMAGE
 
 /**
  * \brief this is what the thread spawned on record actually does. It is
@@ -639,15 +561,9 @@ xvc_xdamage_event_filter (GdkXEvent * xevent, GdkEvent * event, void *user_data)
 void
 do_record_thread ()
 {
-#define DEBUGFUNCTION "do_record_thread()"
     XVC_AppData *app = xvc_appdata_ptr ();
     Job *job = xvc_job_ptr ();
     long pause = 1000;
-
-#ifdef DEBUG
-    printf ("%s %s: Entering with state = %i\n", DEBUGFILE,
-            DEBUGFUNCTION, job->state);
-#endif     // DEBUG
 
     app->recording_thread_running = TRUE;
 
@@ -661,10 +577,6 @@ do_record_thread ()
     }
 
     while ((job->state & VC_READY) == 0) {
-#ifdef DEBUG
-        printf ("%s %s: going for next frame with state %i\n", DEBUGFILE,
-                DEBUGFUNCTION, job->state);
-#endif
         if ((job->state & VC_PAUSE) && !(job->state & VC_STEP)) {
             // make the led monitor stop for pausing
             xvc_led_time = 0;
@@ -673,27 +585,16 @@ do_record_thread ()
             pthread_cond_wait (&(app->recording_condition_unpaused),
                                &(app->recording_paused_mutex));
             pthread_mutex_unlock (&(app->recording_paused_mutex));
-#ifdef DEBUG
-            printf ("%s %s: unpaused\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
         }
 
         pause = job->capture ();
 
         if (pause > 0)
             usleep (pause * 1000);
-#ifdef DEBUG
-        printf ("%s %s: woke up\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
     }
-
-#ifdef DEBUG
-    printf ("%s %s: Leaving\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
 
     app->recording_thread_running = FALSE;
     pthread_exit (NULL);
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -703,17 +604,11 @@ do_record_thread ()
 static void
 stop_recording_nongui_stuff ()
 {
-#define DEBUGFUNCTION "stop_recording_nongui_stuff()"
     int state = 0;
     struct timeval curr_time;
     long stop_time = 0;
     XVC_AppData *app = xvc_appdata_ptr ();
     Job *jobp = xvc_job_ptr ();
-
-#ifdef DEBUG
-    printf ("%s %s: Entering with thread running %i\n",
-            DEBUGFILE, DEBUGFUNCTION, app->recording_thread_running);
-#endif     // DEBUG
 
     if (pause_time) {
         stop_time = pause_time;
@@ -753,8 +648,6 @@ stop_recording_nongui_stuff ()
 
         jobp->capture_returned_errno = 0;
     }
-
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -773,22 +666,15 @@ do_results_help ()
 static void
 stop_recording_gui_stuff ()
 {
-#define DEBUGFUNCTION "stop_recording_gui_stuff()"
     GladeXML *xml = NULL;
     GtkWidget *w = NULL;
     XVC_CapTypeOptions *target = NULL;
     Job *jobp = xvc_job_ptr ();
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef DEBUG
-    printf ("%s %s: Entering\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
-
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     xml = glade_get_widget_tree (GTK_WIDGET (xvc_ctrl_main_window));
@@ -938,7 +824,7 @@ stop_recording_gui_stuff ()
         // video codec
         w = glade_xml_get_widget (xml, "xvc_result_dialog_video_codec_label");
         g_assert (w);
-        gtk_label_set_text (GTK_LABEL (w), xvc_codecs[jobp->targetCodec].name);
+        gtk_label_set_text (GTK_LABEL (w), xvc_video_codecs[jobp->targetCodec].name);
 
         // audio codec
         w = glade_xml_get_widget (xml, "xvc_result_dialog_audio_codec_label");
@@ -1096,11 +982,6 @@ stop_recording_gui_stuff ()
 
         // FIXME: realize move in a way that gives me real error codes
     }
-#ifdef DEBUG
-    printf ("%s %s: Leaving\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
-
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -1112,7 +993,6 @@ stop_recording_gui_stuff ()
 gboolean
 timer_stop_recording ()
 {
-#define DEBUGFUNCTION "timer_stop_recording()"
     Job *jobp = xvc_job_ptr ();
 
     if ((jobp->flags & FLG_AUTO_CONTINUE) != 0) {
@@ -1123,7 +1003,6 @@ timer_stop_recording ()
         xvc_job_set_state (VC_STOP);
         return FALSE;
     }
-#undef DEBUGFUNCTION
 }
 
 static gboolean
@@ -1155,18 +1034,15 @@ on_tray_icon_button_press_event (GtkWidget * widget,
 static void
 start_recording_gui_stuff ()
 {
-#define DEBUGFUNCTION "start_recording_gui_stuff()"
     GladeXML *xml = NULL;
     GtkWidget *w = NULL;
     Job *jobp = xvc_job_ptr ();
     XVC_CapTypeOptions *target = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     if (app->flags & FLG_TO_TRAY) {
@@ -1286,7 +1162,6 @@ start_recording_gui_stuff ()
         g_assert (w);
         gtk_widget_set_sensitive (GTK_WIDGET (w), FALSE);
     }
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -1296,7 +1171,6 @@ start_recording_gui_stuff ()
 static void
 start_recording_nongui_stuff ()
 {
-#define DEBUGFUNCTION "start_recording_nongui_stuff()"
     XVC_AppData *app = xvc_appdata_ptr ();
 
     if (!app->recording_thread_running) {
@@ -1304,11 +1178,9 @@ start_recording_nongui_stuff ()
         Job *job = xvc_job_ptr ();
         XVC_CapTypeOptions *target = NULL;
 
-#ifdef USE_FFMPEG
         if (app->current_mode > 0)
             target = &(app->multi_frame);
         else
-#endif     // USE_FFMPEG
             target = &(app->single_frame);
 
         // the following also unsets VC_READY
@@ -1382,7 +1254,6 @@ start_recording_nongui_stuff ()
                         (void *) do_record_thread, (void *) job);
 
     }
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -1400,7 +1271,6 @@ void
 position_popup_menu (GtkMenu * menu, gint * x, gint * y,
                      gboolean * push_in, gpointer user_data)
 {
-#define DEBUGFUNCTION "position_popup_menu()"
     int pheight = 0, px = 0, py = 0, tx = 0, ty = 0;
     GtkWidget *w = NULL;
 
@@ -1424,7 +1294,6 @@ position_popup_menu (GtkMenu * menu, gint * x, gint * y,
 
     *x = tx;
     *y = ty + pheight;
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -1434,7 +1303,6 @@ position_popup_menu (GtkMenu * menu, gint * x, gint * y,
 void
 xvc_reset_ctrl_main_window_according_to_current_prefs ()
 {
-#define DEBUGFUNCTION "xvc_reset_ctrl_main_window_according_to_current_prefs()"
     GladeXML *mwxml = NULL, *menuxml = NULL;
     GtkWidget *w = NULL;
     GtkTooltips *tooltips;
@@ -1442,15 +1310,9 @@ xvc_reset_ctrl_main_window_according_to_current_prefs ()
     XVC_CapTypeOptions *target = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef DEBUG
-    printf ("%s %s: Entering\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
-
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     mwxml = glade_get_widget_tree (xvc_ctrl_main_window);
@@ -1472,22 +1334,6 @@ xvc_reset_ctrl_main_window_according_to_current_prefs ()
         gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (w), FALSE);
     }
 
-    //
-    // the autocontinue menu item
-    //
-    // make autocontinue menuitem invisible if no ffmpeg
-#ifndef USE_FFMPEG
-    w = NULL;
-    w = glade_xml_get_widget (menuxml, "xvc_ctrl_m1_mitem_autocontinue");
-    g_return_if_fail (w != NULL);
-    gtk_widget_hide (GTK_WIDGET (w));
-
-    w = NULL;
-    w = glade_xml_get_widget (menuxml, "xvc_ctrl_m1_separator1");
-    g_return_if_fail (w != NULL);
-    gtk_widget_hide (GTK_WIDGET (w));
-
-#else      // USE_FFMPEG
     // the rest in case we have ffmpeg
     if (app->current_mode > 0) {
         w = glade_xml_get_widget (menuxml, "xvc_ctrl_m1_mitem_autocontinue");
@@ -1512,7 +1358,6 @@ xvc_reset_ctrl_main_window_according_to_current_prefs ()
         gtk_widget_set_sensitive (GTK_WIDGET (w), FALSE);
         gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (w), FALSE);
     }
-#endif     // USE_FFMPEG
 
     //
     // the filename button
@@ -1609,22 +1454,6 @@ xvc_reset_ctrl_main_window_according_to_current_prefs ()
         gtk_tool_item_set_tooltip (GTK_TOOL_ITEM (w), tooltips, NULL, NULL);
     }
 
-    //
-    // capture type radio buttons
-    //
-    // make capture type radio buttons invisible if no ffmpeg
-#ifndef USE_FFMPEG
-    w = NULL;
-    w = glade_xml_get_widget (menuxml, "xvc_ctrl_m1_mitem_sf_capture");
-    g_return_if_fail (w != NULL);
-    gtk_widget_hide (GTK_WIDGET (w));
-
-    w = NULL;
-    w = glade_xml_get_widget (menuxml, "xvc_ctrl_m1_mitem_mf_capture");
-    g_return_if_fail (w != NULL);
-    gtk_widget_hide (GTK_WIDGET (w));
-#else      // USE_FFMPEG
-
     if (app->current_mode == 0) {
         w = NULL;
         w = glade_xml_get_widget (menuxml, "xvc_ctrl_m1_mitem_mf_capture");
@@ -1646,7 +1475,6 @@ xvc_reset_ctrl_main_window_according_to_current_prefs ()
         g_return_if_fail (w != NULL);
         gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (w), TRUE);
     }
-#endif     // USE_FFMPEG
 
     //
     // the frame lock
@@ -1661,7 +1489,6 @@ xvc_reset_ctrl_main_window_according_to_current_prefs ()
         gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON (w), FALSE);
     }
 
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -1695,13 +1522,11 @@ xvc_reset_ctrl_main_window_according_to_current_prefs ()
 Boolean
 xvc_init_pre (int argc, char **argv)
 {
-#define DEBUGFUNCTION "xvc_init_pre()"
     g_thread_init (NULL);
     gdk_threads_init ();
 
     gtk_init (&argc, &argv);
     return TRUE;
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -1714,14 +1539,9 @@ xvc_init_pre (int argc, char **argv)
 Boolean
 xvc_ui_create ()
 {
-#define DEBUGFUNCTION "xvc_ui_create()"
     GladeXML *xml = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
     GtkWidget *w = NULL;
-
-#ifdef DEBUG
-    printf ("%s %s: Entering\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
 
     // only show the ui if not in nogui
     if ((app->flags & FLG_NOGUI) == 0) {
@@ -1738,83 +1558,6 @@ xvc_ui_create ()
         xvc_ctrl_main_window =
             glade_xml_get_widget (xml, "xvc_ctrl_main_window");
 
-#if GTK_CHECK_VERSION(2, 5, 0)
-#else
-        {
-            GtkWidget *w = NULL;
-
-/*
- *            replace the following stock ids
- *
-gtk-media-stop gtk-stop
-gtk-media-pause gtk-go-up (funky, but it works)
-gtk-media-record gtk-convert
-gtk-media-next gtk-goto-last
-gtk-media-rewind gtk-go-back
-gtk-media-forward gtk-go-forward
-gtk-edit gtk-paste (2nd choice would be gtk-open)
-*
-*/
-            w = glade_xml_get_widget (xml, "xvc_ctrl_stop_toggle");
-            if (w) {
-                gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (w), NULL);
-                gtk_tool_button_set_stock_id (GTK_TOOL_BUTTON (w), "gtk-stop");
-            }
-
-            w = glade_xml_get_widget (xml, "xvc_ctrl_pause_toggle");
-            if (w) {
-                gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (w), NULL);
-                gtk_tool_button_set_stock_id (GTK_TOOL_BUTTON (w), "gtk-go-up");
-            }
-
-            w = glade_xml_get_widget (xml, "xvc_ctrl_record_toggle");
-            if (w) {
-                gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (w), NULL);
-                gtk_tool_button_set_stock_id (GTK_TOOL_BUTTON (w),
-                                              "gtk-convert");
-            }
-
-            w = glade_xml_get_widget (xml, "xvc_ctrl_step_button");
-            if (w) {
-                gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (w), NULL);
-                gtk_tool_button_set_stock_id (GTK_TOOL_BUTTON (w),
-                                              "gtk-goto-last");
-            }
-
-            w = glade_xml_get_widget (xml, "xvc_ctrl_back_button");
-            if (w) {
-                gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (w), NULL);
-                gtk_tool_button_set_stock_id (GTK_TOOL_BUTTON (w),
-                                              "gtk-go-back");
-            }
-
-            w = glade_xml_get_widget (xml, "xvc_ctrl_forward_button");
-            if (w) {
-                gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (w), NULL);
-                gtk_tool_button_set_stock_id (GTK_TOOL_BUTTON (w),
-                                              "gtk-go-forward");
-            }
-
-            w = glade_xml_get_widget (xml, "xvc_ctrl_edit_button");
-            if (w) {
-                gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (w), NULL);
-                gtk_tool_button_set_stock_id (GTK_TOOL_BUTTON (w), "gtk-paste");
-            }
-
-            w = NULL;
-        }
-#endif     // GTK_CHECK_VERSION
-
-#if GTK_CHECK_VERSION(2, 6, 0)
-#else
-        {
-            GtkWidget *w = NULL;
-
-            w = glade_xml_get_widget (xml, "xvc_ctrl_m1_mitem_about");
-            if (w)
-                gtk_widget_hide (w);
-        }
-#endif     // GKT_CHECK_VERSION
 
         xml = NULL;
         // popup window
@@ -1841,12 +1584,8 @@ gtk-edit gtk-paste (2nd choice would be gtk-open)
         glade_xml_signal_autoconnect (xml);
 
     }
-#ifdef DEBUG
-    printf ("%s %s: Leaving\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
 
     return TRUE;
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -1862,7 +1601,6 @@ gtk-edit gtk-paste (2nd choice would be gtk-open)
 Boolean
 xvc_frame_create (Window win)
 {
-#define DEBUGFUNCTION "xvc_frame_create()"
     XVC_AppData *app = xvc_appdata_ptr ();
 
     if ((app->flags & FLG_NOGUI) == 0) {    /* there's one good reason for not
@@ -1903,7 +1641,6 @@ xvc_frame_create (Window win)
                               app->area->height, app->area->x, app->area->y);
     }
     return TRUE;
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -1918,28 +1655,15 @@ xvc_frame_create (Window win)
 void
 xvc_check_start_options ()
 {
-#define DEBUGFUNCTION "xvc_check_start_options()"
     int count_non_info_messages = 0;
     int rc = 0;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef DEBUG
-    printf ("%s %s: Entering with errors_after_cli = %p\n", DEBUGFILE,
-            DEBUGFUNCTION, errors_after_cli);
-#endif     // DEBUG
-
     if (OK_attempts > 0 && errors_after_cli != NULL) {
         errors_after_cli = xvc_appdata_validate (app, 1, &rc);
 
-#ifdef DEBUG
-        printf ("%s %s: new errors_after_cli = %p\n", DEBUGFILE,
-                DEBUGFUNCTION, errors_after_cli);
-#endif     // DEBUG
-
         if (rc == -1) {
-            fprintf (stderr,
-                     "%s %s: Unrecoverable error while validating options, please contact the xvidcap project.\n",
-                     DEBUGFILE, DEBUGFUNCTION);
+            fprintf (stderr, "Unrecoverable error while validating options, please contact the xvidcap project.\n");
             exit (1);
         }
     }
@@ -1996,27 +1720,17 @@ xvc_check_start_options ()
 
             errors_after_cli = xvc_appdata_validate (app, 1, &rc);
             if (rc == -1) {
-                fprintf (stderr,
-                         "%s %s: Unrecoverable error while validating options, please contact the xvidcap project.\n",
-                         DEBUGFILE, DEBUGFUNCTION);
+                fprintf (stderr, "Unrecoverable error while validating options, please contact the xvidcap project.\n");
                 exit (1);
             }
         }
 
         if (errors_after_cli != NULL && count_non_info_messages > 0) {
-            fprintf (stderr,
-                     "%s %s: You have specified some conflicting settings which could not be resolved automatically.\n",
-                     DEBUGFILE, DEBUGFUNCTION);
+            fprintf(stderr, "You have specified some conflicting settings which could not be resolved automatically.\n");
             exit (1);
         }
         warning_submit ();
     }
-
-#ifdef DEBUG
-    printf ("%s %s: Leaving\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
-
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -2030,12 +1744,7 @@ xvc_check_start_options ()
 Boolean
 xvc_ui_init (XVC_ErrorListItem * errors)
 {
-#define DEBUGFUNCTION "xvc_ui_init()"
     XVC_AppData *app = xvc_appdata_ptr ();
-
-#ifdef DEBUG
-    printf ("%s %s: Entering\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
 
     // display warning dialog if required
     errors_after_cli = errors;
@@ -2049,12 +1758,7 @@ xvc_ui_init (XVC_ErrorListItem * errors)
         gtk_init_add ((GtkFunction) xvc_capture_start, NULL);
     }
 
-#ifdef DEBUG
-    printf ("%s %s: Leaving\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
-
     return TRUE;
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -2065,12 +1769,10 @@ xvc_ui_init (XVC_ErrorListItem * errors)
 int
 xvc_ui_run ()
 {
-#define DEBUGFUNCTION "xvc_ui_run()";
 
     gtk_main ();
 
     return 0;
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -2099,10 +1801,6 @@ xvc_idle_add (void *func, void *data)
 Boolean
 xvc_change_filename_display ()
 {
-#define DEBUGFUNCTION "xvc_change_filename_display()"
-#ifdef DEBUG
-    printf ("%s %s: Entering\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
     XVC_AppData *app = xvc_appdata_ptr ();
     Job *job = xvc_job_ptr ();
     int ret = app->recording_thread_running;
@@ -2114,13 +1812,8 @@ xvc_change_filename_display ()
         last_pic_no = job->pic_no;
         GtkChangeLabel (last_pic_no);
     }
-#ifdef DEBUG
-    printf ("%s %s: Leaving! ...continuing? %i\n", DEBUGFILE, DEBUGFUNCTION,
-            (int) ret);
-#endif     // DEBUG
 
     return ret;
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -2135,28 +1828,14 @@ xvc_change_filename_display ()
 void
 xvc_capture_stop_signal (Boolean wait)
 {
-#define DEBUGFUNCTION "xvc_capture_stop_signal()"
     int status = -1;
     XVC_AppData *app = xvc_appdata_ptr ();
-
-#ifdef DEBUG
-    printf ("%s %s: Entering, should we wait? %i\n",
-            DEBUGFILE, DEBUGFUNCTION, wait);
-#endif     // DEBUG
 
     xvc_job_set_state (VC_STOP);
 
     if (app->recording_thread_running) {
-#ifdef DEBUG
-        printf ("%s %s: stop pressed while recording\n",
-                DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
         // stop waiting for next frame to capture
         status = pthread_kill (recording_thread, SIGALRM);
-#ifdef DEBUG
-        printf ("%s %s: thread %i kill with rc %i\n",
-                DEBUGFILE, DEBUGFUNCTION, (int) recording_thread, status);
-#endif     // DEBUG
     }
 
     if (wait) {
@@ -2164,10 +1843,6 @@ xvc_capture_stop_signal (Boolean wait)
             usleep (100);
         }
     }
-#ifdef DEBUG
-    printf ("%s %s: Leaving\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -2177,16 +1852,9 @@ xvc_capture_stop_signal (Boolean wait)
 Boolean
 xvc_capture_stop ()
 {
-#define DEBUGFUNCTION "xvc_capture_stop()"
     Job *job = xvc_job_ptr ();
 
-#ifdef DEBUG
-    printf ("%s %s: stopping\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
     stop_recording_nongui_stuff (job);
-#ifdef DEBUG
-    printf ("%s %s: done stopping non-gui stuff\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
     if (!(job->flags & FLG_NOGUI)) {
         gdk_threads_enter ();
         stop_recording_gui_stuff (job);
@@ -2197,7 +1865,6 @@ xvc_capture_stop ()
     }
 
     return FALSE;
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -2206,14 +1873,11 @@ xvc_capture_stop ()
 void
 xvc_capture_start ()
 {
-#define DEBUGFUNCTION "xvc_capture_start()"
     Job *job = xvc_job_ptr ();
 
     start_recording_nongui_stuff (job);
     if (!(job->flags & FLG_NOGUI))
         start_recording_gui_stuff (job);
-
-#undef DEBUGFUNCTION
 }
 
 /*
@@ -2226,10 +1890,8 @@ void
 xvc_frame_change (int x, int y, int width, int height,
                   Boolean reposition_control, Boolean show_dimensions)
 {
-#define DEBUGFUNCTION "xvc_frame_change()"
     xvc_change_gtk_frame (x, y, width, height, reposition_control,
                           show_dimensions);
-#undef DEBUGFUNCTION
 }
 
 /**
@@ -2246,8 +1908,6 @@ xvc_frame_change (int x, int y, int width, int height,
 Boolean
 xvc_frame_monitor ()
 {
-#define DEBUGFUNCTION "xvc_frame_monitor()"
-
     Job *job = xvc_job_ptr ();
     XVC_AppData *app = xvc_appdata_ptr ();
     int percent = 0, diff = 0;
@@ -2255,10 +1915,6 @@ xvc_frame_monitor ()
     GtkWidget *w = NULL;
     int ret = app->recording_thread_running;
 
-#ifdef DEBUG
-    printf ("%s %s: Entering with time = %i\n", DEBUGFILE, DEBUGFUNCTION,
-            xvc_led_time);
-#endif     // DEBUG
 
     // fastpath
     if (xvc_led_time != 0 && last_led_time == xvc_led_time)
@@ -2295,25 +1951,17 @@ xvc_frame_monitor ()
     if (percent == 0)
         LED_METER (w)->old_max_da = 0;
 
-#ifdef DEBUG
-    printf ("%s %s: Leaving with percent = %i ... continuing? %i\n",
-            DEBUGFILE, DEBUGFUNCTION, percent, ret);
-#endif     // DEBUG
-
     return ret;
-#undef DEBUGFUNCTION
 }
 
 /*
  * callbacks here ....
  *
  */
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 gboolean
 on_xvc_ctrl_main_window_delete_event (GtkWidget * widget,
                                       GdkEvent * event, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_main_window_delete_event()"
     Job *jobp = xvc_job_ptr ();
 
     if (jobp && (jobp->state & VC_STOP) == 0) {
@@ -2324,55 +1972,39 @@ on_xvc_ctrl_main_window_delete_event (GtkWidget * widget,
     gtk_main_quit ();                  /** \todo why does this seem to be
 necessary with libglade where it was not previously */
     return FALSE;
-#undef DEBUGFUNCTION
 }
 
 gboolean
 on_xvc_ctrl_main_window_destroy_event (GtkWidget * widget,
                                        GdkEvent * event, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_main_window_destroy_event()"
     gtk_main_quit ();
     return FALSE;
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_m1_mitem_preferences_activate (GtkMenuItem * menuitem,
                                            gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_m1_mitem_preferences_activate()"
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef DEBUG
-    printf ("%s %s: Entering with app %p\n", DEBUGFILE, DEBUGFUNCTION, app);
-#endif     // DEBUG
 
     xvc_create_pref_dialog (app);
-
-#ifdef DEBUG
-    printf ("%s %s: Leaving\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_m1_mitem_save_preferences_activate (GtkMenuItem *
                                                 menuitem, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_m1_mitem_save_preferences_activate()"
     Job *jobp = xvc_job_ptr ();
 
     xvc_write_options_file (jobp);
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_m1_mitem_sf_capture_activate (GtkMenuItem * menuitem,
                                           gpointer user_data)
 {
-#ifdef USE_FFMPEG
-#define DEBUGFUNCTION "on_xvc_ctrl_m1_mitem_sf_capture_activate()"
     XVC_AppData *app = xvc_appdata_ptr ();
 
     if (app->current_mode == 1
@@ -2381,16 +2013,12 @@ on_xvc_ctrl_m1_mitem_sf_capture_activate (GtkMenuItem * menuitem,
         app->current_mode = (app->current_mode == 0) ? 1 : 0;
         xvc_toggle_cap_type ();
     }
-#undef DEBUGFUNCTION
-#endif     // USE_FFMPEG
 }
 
 void
 on_xvc_ctrl_m1_mitem_mf_capture_activate (GtkMenuItem * menuitem,
                                           gpointer user_data)
 {
-#ifdef USE_FFMPEG
-#define DEBUGFUNCTION "on_xvc_ctrl_m1_mitem_mf_capture_activate()"
     XVC_AppData *app = xvc_appdata_ptr ();
 
     if (app->current_mode == 0
@@ -2399,15 +2027,12 @@ on_xvc_ctrl_m1_mitem_mf_capture_activate (GtkMenuItem * menuitem,
         app->current_mode = (app->current_mode == 0) ? 1 : 0;
         xvc_toggle_cap_type ();
     }
-#undef DEBUGFUNCTION
-#endif     // USE_FFMPEG
 }
 
 void
 on_xvc_ctrl_m1_mitem_autocontinue_activate (GtkMenuItem * menuitem,
                                             gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_m1_mitem_autocontinue_activate()"
     Job *jobp = xvc_job_ptr ();
     XVC_AppData *app = xvc_appdata_ptr ();
 
@@ -2426,13 +2051,11 @@ on_xvc_ctrl_m1_mitem_autocontinue_activate (GtkMenuItem * menuitem,
         jobp->flags &= ~FLG_AUTO_CONTINUE;
         app->flags &= ~FLG_AUTO_CONTINUE;
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_m1_show_frame_activate (GtkMenuItem * menuitem, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_m1_show_frame_activate()"
     Job *jobp = xvc_job_ptr ();
     XVC_AppData *app = xvc_appdata_ptr ();
 
@@ -2446,22 +2069,18 @@ on_xvc_ctrl_m1_show_frame_activate (GtkMenuItem * menuitem, gpointer user_data)
         app->flags |= FLG_NOFRAME;
         xvc_destroy_gtk_frame ();
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_m1_mitem_make_activate (GtkMenuItem * menuitem, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_m1_mitem_make_activate()"
     Job *jobp = xvc_job_ptr ();
     XVC_CapTypeOptions *target = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     if (!app->current_mode) {
@@ -2474,67 +2093,48 @@ on_xvc_ctrl_m1_mitem_make_activate (GtkMenuItem * menuitem, gpointer user_data)
                              jobp->pic_no, app->area->width,
                              app->area->height, target->fps);
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_m1_mitem_help_activate (GtkMenuItem * menuitem, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_m1_mitem_help_activate()"
     system ("yelp ghelp:xvidcap &");
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_m1_mitem_quit_activate (GtkMenuItem * menuitem, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_m1_mitem_quit_activate()"
     gboolean ignore = TRUE;
 
     g_signal_emit_by_name ((GtkObject *) xvc_ctrl_main_window,
                            "destroy_event", 0, &ignore);
-#undef DEBUGFUNCTION
 }
 
 gint
 on_xvc_result_dialog_key_press_event (GtkWidget * widget, GdkEvent * event)
 {
-#define DEBUGFUNCTION "on_xvc_result_dialog_key_press_event()"
     GdkEventKey *kevent = NULL;
 
     g_assert (widget);
     g_assert (event);
     kevent = (GdkEventKey *) event;
 
-#ifdef DEBUG
-    printf ("%s %s: Entering\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
-
     if (kevent->keyval == 65470) {
         do_results_help ();
     }
-#ifdef DEBUG
-    printf ("%s %s: Leaving\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
 
     // Tell calling code that we have not handled this event; pass it on.
     return FALSE;
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_result_dialog_select_filename_button_clicked (GtkButton * button,
                                                      gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_result_select_filename_button_clicked()"
     int result = 0;
 
     GladeXML *xml = NULL;
     GtkWidget *w = NULL, *dialog = NULL;
-
-#ifdef DEBUG
-    printf ("%s %s: Entering\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
 
     // load the interface
     xml = glade_xml_new (XVC_GLADE_FILE, "xvc_save_filechooserdialog", NULL);
@@ -2572,26 +2172,13 @@ on_xvc_result_dialog_select_filename_button_clicked (GtkButton * button,
     }
 
     gtk_widget_destroy (dialog);
-
-#ifdef DEBUG
-    printf ("%s %s: Leaving with filename %s\n", DEBUGFILE, DEBUGFUNCTION,
-            target_file_name);
-#endif     // DEBUG
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_stop_toggle_toggled (GtkToggleToolButton * button,
                                  gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_stop_toggle_toggled()"
     XVC_AppData *app = xvc_appdata_ptr ();
-
-#ifdef DEBUG
-    printf ("%s %s: stopp button toggled (%i)\n", DEBUGFILE, DEBUGFUNCTION,
-            gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON
-                                               (button)));
-#endif     // DEBUG
 
     if (gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON (button))) {
         if (app->recording_thread_running)
@@ -2611,28 +2198,23 @@ on_xvc_ctrl_stop_toggle_toggled (GtkToggleToolButton * button,
     } else {
         // empty
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_record_toggle_toggled (GtkToggleToolButton * button,
                                    gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_record_toggle_toggled()"
-
     if (gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON (button))) {
         xvc_capture_start ();
     } else {
         // empty
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_pause_toggle_toggled (GtkToggleToolButton * button,
                                   gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_pause_toggle_toggled()"
     struct timeval curr_time;
     GladeXML *xml = NULL;
     GtkWidget *w = NULL;
@@ -2640,21 +2222,13 @@ on_xvc_ctrl_pause_toggle_toggled (GtkToggleToolButton * button,
     XVC_CapTypeOptions *target = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     xml = glade_get_widget_tree (GTK_WIDGET (xvc_ctrl_main_window));
     g_assert (xml);
-
-#ifdef DEBUG
-    printf ("%s %s: is paused? (%d)\n", DEBUGFILE, DEBUGFUNCTION,
-            gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON
-                                               (button)));
-#endif
 
     if (gtk_toggle_tool_button_get_active (GTK_TOGGLE_TOOL_BUTTON (button))) {
         gettimeofday (&curr_time, NULL);
@@ -2739,14 +2313,11 @@ on_xvc_ctrl_pause_toggle_toggled (GtkToggleToolButton * button,
                                            timer_stop_recording, jobp);
         }
     }
-
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_step_button_clicked (GtkButton * button, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_step_button_clicked()"
     GladeXML *xml = NULL;
     GtkWidget *w = NULL;
     Job *jobp = xvc_job_ptr ();
@@ -2754,11 +2325,9 @@ on_xvc_ctrl_step_button_clicked (GtkButton * button, gpointer user_data)
     XVC_CapTypeOptions *target = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     if (app->current_mode == 0) {
@@ -2788,24 +2357,20 @@ on_xvc_ctrl_step_button_clicked (GtkButton * button, gpointer user_data)
             gtk_widget_set_sensitive (GTK_WIDGET (w), FALSE);
         }
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_filename_button_clicked (GtkButton * button, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_filename_button_clicked()"
     GladeXML *xml = NULL;
     GtkWidget *w = NULL;
     Job *jobp = xvc_job_ptr ();
     XVC_CapTypeOptions *target = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     if (app->current_mode == 0) {
@@ -2828,24 +2393,20 @@ on_xvc_ctrl_filename_button_clicked (GtkButton * button, gpointer user_data)
             GtkChangeLabel (jobp->pic_no);
         }
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_back_button_clicked (GtkButton * button, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_back_button_clicked()"
     GladeXML *xml = NULL;
     GtkWidget *w = NULL;
     Job *jobp = xvc_job_ptr ();
     XVC_CapTypeOptions *target = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     if (app->current_mode == 0) {
@@ -2853,9 +2414,7 @@ on_xvc_ctrl_back_button_clicked (GtkButton * button, gpointer user_data)
             jobp->pic_no -= target->step;
             GtkChangeLabel (jobp->pic_no);
         } else {
-            fprintf (stderr,
-                     "%s %s: back button active although picture number < step. this should never happen\n",
-                     DEBUGFILE, DEBUGFUNCTION);
+            fprintf (stderr, "Back button active although picture number < step. this should never happen\n");
         }
         if (jobp->pic_no < target->step)
             gtk_widget_set_sensitive (GTK_WIDGET (button), FALSE);
@@ -2881,31 +2440,25 @@ on_xvc_ctrl_back_button_clicked (GtkButton * button, gpointer user_data)
             jobp->movie_no -= 1;
             GtkChangeLabel (jobp->pic_no);
         } else {
-            fprintf (stderr,
-                     "%s %s: back button active although movie number == 0. this should never happen\n",
-                     DEBUGFILE, DEBUGFUNCTION);
+            fprintf(stderr, "Back button active although movie number == 0. this should never happen\n");
         }
         if (jobp->movie_no == 0)
             gtk_widget_set_sensitive (GTK_WIDGET (button), FALSE);
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_forward_button_clicked (GtkButton * button, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_forward_button_clicked()"
     GladeXML *xml = NULL;
     GtkWidget *w = NULL;
     Job *jobp = xvc_job_ptr ();
     XVC_CapTypeOptions *target = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     if (app->current_mode == 0) {
@@ -2947,14 +2500,12 @@ on_xvc_ctrl_forward_button_clicked (GtkButton * button, gpointer user_data)
             gtk_widget_set_sensitive (GTK_WIDGET (w), TRUE);
         }
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_lock_toggle_toggled (GtkToggleToolButton *
                                  togglebutton, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_lock_toggle_toggled()"
     GtkTooltips *tooltips;
 
     tooltips = gtk_tooltips_new ();
@@ -2970,24 +2521,11 @@ on_xvc_ctrl_lock_toggle_toggled (GtkToggleToolButton *
                                    _("Detach selection frame"),
                                    _("Detach selection frame"));
 
-/*
-        gtk_window_set_gravity (GTK_WINDOW (xvc_ctrl_main_window),
-                                GDK_GRAVITY_NORTH_WEST);
-        gtk_window_get_position (GTK_WINDOW (xvc_ctrl_main_window), &x, &y);
-        gtk_window_get_size (GTK_WINDOW (xvc_ctrl_main_window), &pwidth,
-                             &pheight);
-        gtk_window_set_gravity (GTK_WINDOW (xvc_ctrl_main_window),
-                                GDK_GRAVITY_STATIC);
-        gtk_window_get_position (GTK_WINDOW (xvc_ctrl_main_window), &x, &y);
-        gtk_window_get_size (GTK_WINDOW (xvc_ctrl_main_window), &pwidth,
-                             &pheight);
-*/
         xvc_get_ctrl_frame_extents (GDK_WINDOW (xvc_ctrl_main_window->window),
                                     &ctrl_rect);
         x = ctrl_rect.x;
         y = ctrl_rect.y;
         height = ctrl_rect.height;
-//        width = ctrl_rect.width;
 
         if (x < 0)
             x = 0;
@@ -3003,14 +2541,12 @@ on_xvc_ctrl_lock_toggle_toggled (GtkToggleToolButton *
                                    _("Attach selection frame"),
                                    _("Attach selection frame"));
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_select_toggle_toggled (GtkToggleToolButton *
                                    togglebutton, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_select_toggle_toggled()"
     Job *jobp = xvc_job_ptr ();
     XVC_AppData *app = xvc_appdata_ptr ();
 
@@ -3028,11 +2564,9 @@ on_xvc_ctrl_select_toggle_toggled (GtkToggleToolButton *
         GladeXML *menuxml = NULL;
         GtkWidget *show_frame_mitem = NULL;
 
-#ifdef USE_FFMPEG
         if (app->current_mode > 0)
             target = &(app->multi_frame);
         else
-#endif     // USE_FFMPEG
             target = &(app->single_frame);
 
         g_assert (app->dpy);
@@ -3062,12 +2596,10 @@ on_xvc_ctrl_select_toggle_toggled (GtkToggleToolButton *
         // grab the mouse
         //
         if (XGrabPointer (app->dpy, app->root_window, False,
-                          PointerMotionMask | ButtonPressMask |
-                          ButtonReleaseMask, GrabModeSync,
-                          GrabModeAsync, app->root_window, cursor, CurrentTime)
+                          PointerMotionMask | ButtonPressMask | ButtonReleaseMask,
+		    			  GrabModeSync, GrabModeAsync, app->root_window, cursor, CurrentTime)
             != GrabSuccess) {
-            fprintf (stderr, "%s %s: Can't grab mouse!\n", DEBUGFILE,
-                     DEBUGFUNCTION);
+            fprintf(stderr, "Can't grab mouse!\n");
             return;
         }
         x_down = y_down = x_up = y_up = width = height = 0;
@@ -3187,9 +2719,7 @@ on_xvc_ctrl_select_toggle_toggled (GtkToggleToolButton *
         xvc_job_set_colors ();
 
         if (app->flags & FLG_RUN_VERBOSE) {
-            fprintf (stderr, "%s %s: color_table first entry: 0x%.8X\n",
-                     DEBUGFILE, DEBUGFUNCTION,
-                     *(u_int32_t *) jobp->color_table);
+            fprintf (stderr, "Color_table first entry: 0x%.8X\n", *(u_int32_t *) jobp->color_table);
         }
         // in case the frame is off, set it on and store the fact that
         // we did so
@@ -3203,30 +2733,21 @@ on_xvc_ctrl_select_toggle_toggled (GtkToggleToolButton *
 
         xvc_job_set_save_function (jobp->target);
 
-#ifdef DEBUG
-        printf ("%s%s: new visual: %d\n", DEBUGFILE, DEBUGFUNCTION,
-                app->win_attr.visual->class);
-#endif
 
     }
     gtk_toggle_tool_button_set_active (togglebutton, FALSE);
-
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_m1_mitem_animate_activate (GtkButton * button, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_m1_mitem_animate_activate()"
     Job *jobp = xvc_job_ptr ();
     XVC_CapTypeOptions *target = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     if (!app->current_mode) {
@@ -3239,22 +2760,18 @@ on_xvc_ctrl_m1_mitem_animate_activate (GtkButton * button, gpointer user_data)
                              jobp->pic_no, app->area->width,
                              app->area->height, target->fps);
     }
-#undef DEBUGFUNCTION
 }
 
 void
 on_xvc_ctrl_edit_button_clicked (GtkToolButton * button, gpointer user_data)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_edit_button_clicked()"
     Job *jobp = xvc_job_ptr ();
     XVC_CapTypeOptions *target = NULL;
     XVC_AppData *app = xvc_appdata_ptr ();
 
-#ifdef USE_FFMPEG
     if (app->current_mode > 0)
         target = &(app->multi_frame);
     else
-#endif     // USE_FFMPEG
         target = &(app->single_frame);
 
     if (!app->current_mode) {
@@ -3268,14 +2785,12 @@ on_xvc_ctrl_edit_button_clicked (GtkToolButton * button, gpointer user_data)
                              jobp->pic_no, app->area->width,
                              app->area->height, target->fps);
     }
-#undef DEBUGFUNCTION
 }
 
 gint
 on_xvc_ctrl_filename_button_button_press_event (GtkWidget * widget,
                                                 GdkEvent * event)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_filename_button_press_event()"
     gboolean is_sensitive = FALSE;
     GdkEventButton *bevent = NULL;
 
@@ -3300,14 +2815,12 @@ on_xvc_ctrl_filename_button_button_press_event (GtkWidget * widget,
     }
     // Tell calling code that we have not handled this event; pass it on.
     return FALSE;
-#undef DEBUGFUNCTION
 }
 
 // this handles the shortcut keybindings for the menu
 gint
 on_xvc_ctrl_main_window_key_press_event (GtkWidget * widget, GdkEvent * event)
 {
-#define DEBUGFUNCTION "on_xvc_ctrl_main_window_key_press_event()"
     gboolean is_sensitive = FALSE;
     GtkWidget *button = NULL, *mitem = NULL;
     GdkEventKey *kevent = NULL;
@@ -3316,10 +2829,6 @@ on_xvc_ctrl_main_window_key_press_event (GtkWidget * widget, GdkEvent * event)
     g_assert (widget);
     g_assert (event);
     kevent = (GdkEventKey *) event;
-
-#ifdef DEBUG
-    printf ("%s %s: Entering\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
 
     xml = glade_get_widget_tree (xvc_ctrl_main_window);
     g_assert (xml);
@@ -3352,22 +2861,16 @@ on_xvc_ctrl_main_window_key_press_event (GtkWidget * widget, GdkEvent * event)
         gtk_menu_item_activate (GTK_MENU_ITEM (mitem));
         return TRUE;
     }
-#ifdef DEBUG
-    printf ("%s %s: Leaving\n", DEBUGFILE, DEBUGFUNCTION);
-#endif     // DEBUG
 
-    // Tell calling code that we have not handled this event; pass it on.
+	// Tell calling code that we have not handled this event; pass it on.
     return FALSE;
-#undef DEBUGFUNCTION
 }
 
-#if GTK_CHECK_VERSION(2, 6, 0)
 void
 on_xvc_about_main_window_close (GtkAboutDialog * window, gpointer user_data)
 {
     gtk_widget_destroy (GTK_WIDGET (window));
 }
-#endif     // GTK_CHECK_VERSION
 
 void
 on_xvc_ctrl_m1_mitem_about_activate (GtkMenuItem * menuitem, gpointer user_data)
@@ -3410,5 +2913,3 @@ on_xvc_ti_pause_selected (GtkMenuItem * menuitem, gpointer user_data)
                                        gtk_check_menu_item_get_active
                                        (GTK_CHECK_MENU_ITEM (menuitem)));
 }
-
-#endif     // DOXYGEN_SHOULD_SKIP_THIS

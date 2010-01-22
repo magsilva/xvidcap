@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 1997 Rasca Gmelch, Berlin
- * Copyright (C) 2003-07 Karl H. Beckers, Frankfurt
+ * Copyright (C) 2010 Marco Aurélio Graciotto Silva, São Carlos, Brazil
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,30 +16,18 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _xvc_CAPTURE_H__
-#define _xvc_CAPTURE_H__
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#define max(a,b) ((a)>(b)? (a):(b))
 
-#include <X11/Intrinsic.h>
+#define min(a,b) ((a)<(b)? (a):(b))
 
-/**
- * Function used for capturing. This one is used with source = x11,
- * i. e. when capturing from X11 display w/o SHM
- *
- * @return the number of msecs in which the next capture is due
- */
-long xvc_capture_x11();
-
-/**
- * Function used for capturing. This one is used with source = shm,
- *      i. e. when capturing from X11 with SHM support
- *
- * @return the number of msecs in which the next capture is due
- */
-long xvc_capture_shm();
+#define lowbit(x) ((x) & (~(x) + 1))
 
 
-#endif     // _xvc_CAPTURE_H__
+#define XVC_MAX(a,b) ((a)>(b)? (a):(b))
+
+#define XVC_MIN(a,b) ((a)<(b)? (a):(b))
+
+#define XVC_GLADE_FILE PACKAGE_DATA_DIR"/xvidcap/glade/gnome-xvidcap.glade"
+
+#define PATH_MAX 4096

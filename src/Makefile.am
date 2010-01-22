@@ -13,10 +13,10 @@ INCLUDES = \
 AM_CFLAGS =\
 	 -Wall\
 	 -g \
+	 -std=c99
 	 -DDBUS_SERVICE_DIR=\""$(datadir)/dbus-1/service"\"
-#	 -DDEBUG -DDEBUG2
 
-bin_PROGRAMS = xvidcap
+bin_PROGRAMS = xvidcap xvidcap-dbus-client
 
 xvidcap_SOURCES = \
     app_data.c \
@@ -24,7 +24,7 @@ xvidcap_SOURCES = \
     capture.c \
     capture.h \
     codecs.c \
-	codecs.h \
+    codecs.h \
     colors.c \
     colors.h \
     frame.c \
@@ -40,8 +40,8 @@ xvidcap_SOURCES = \
     led_meter.c \
     led_meter.h \
     control.h \
-	main.c \
-    options.c \
+    main.c \
+    preferences.c \
     xtoffmpeg.c \
     xtoffmpeg.h \
     xtoxwd.c \
@@ -51,39 +51,29 @@ xvidcap_SOURCES = \
     xvc_error_item.c \
     xvc_error_item.h \
     xvidcap-intl.h \
-        eggtrayicon.h \
-        eggtrayicon.c
+    eggtrayicon.h \
+    eggtrayicon.c \
+    dbus-server-object.h \
+    dbus-server-object.c
+
 
 xvidcap_LDADD = $(PACKAGE_LIBS)
 
-if SOLARIS
-xvidcap_LDFLAGS = 
-xvidcap_LDADD += -lXext -lX11 
-else
 xvidcap_LDFLAGS = -export-dynamic
-endif
 
 EXTRA_DIST = $(glade_DATA)
 
-if USE_DBUS
-xvidcap_SOURCES += \
-	dbus-server-object.h \
-	dbus-server-object.c
-
-bin_PROGRAMS += xvidcap-dbus-client
 
 xvidcap_dbus_client_SOURCES = xvidcap-dbus-client.c
 
 xvidcap_dbus_client_LDADD = $(PACKAGE_LIBS)
 
-if SOLARIS
-xvidcap_dbus_client_LDFLAGS =
-else
 xvidcap_dbus_client_LDFLAGS = -export-dynamic
-endif
 
-BUILT_SOURCES = xvidcap-dbus-glue.h xvidcap-client-bindings.h
+
 # We don't want to install this header
+BUILT_SOURCES = xvidcap-dbus-glue.h xvidcap-client-bindings.h
+
 noinst_HEADERS = $(BUILT_SOURCES)
 
 # Correctly clean the generated headers, but keep the xml description
@@ -97,5 +87,4 @@ xvidcap-client-bindings.h:  xvidcap-dbus.xml
 	dbus-binding-tool --prefix=xvc_server --mode=glib-client $<> $@
 
 EXTRA_DIST += xvidcap-dbus.xml
-endif
 

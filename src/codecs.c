@@ -1,9 +1,3 @@
-/**
- * \file codecs.c
- *
- * This file contains all data types and functions related to video and audio
- * codecs and file formats.
- */
 /*
  * Copyright (C) 2004-07 Karl, Frankfurt
  *
@@ -22,30 +16,20 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-#define DEBUGFILE "codecs.c"
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#endif     // DOXYGEN_SHOULD_SKIP_THIS
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef SOLARIS
-#include <strings.h>
-#else      // SOLARIS
 #include <string.h>
-#endif     // SOLARIS
 #include <ctype.h>
 #include <libintl.h>
 #include <math.h>
 #include <locale.h>
 
-#ifdef USE_FFMPEG
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#endif     // USE_FFMPEG
 
 #include "app_data.h"
 #include "codecs.h"
@@ -54,792 +38,494 @@
 /*
  * fps and fps_rage arrays for use in the codecs array
  */
-static const XVC_FpsRange one_to_hundred_range[] = {
-    {
-     {1, 10},
-     {100, 1}
-     }
+static const XVC_FpsRange fps_range[] = {
+	{
+		{1, 10},
+		{100, 1}
+	}
 };
 
-#define len_one_to_hundred_range (sizeof(one_to_hundred_range) / \
-    sizeof(XVC_FpsRange))
+#define fps_range (sizeof(fps_range) / sizeof(XVC_FpsRange))
 
-static const XVC_FpsRange mpeg4_range[] = {
-    {
-     {75, 10},
-     {30, 1}
-     }
-};
 
-#define len_mpeg4_range (sizeof(mpeg4_range) / sizeof(XVC_FpsRange))
-
-static const XVC_Fps mpeg1_fps[] = {
-    {24000, 1001},
-    {24, 1},
-    {25, 1},
-    {30000, 1001},
-    {30, 1},
-    {50, 1},
-    {60000, 1001},
-    {60, 1},
-};
-
-#define len_mpeg1_fps (sizeof(mpeg1_fps) / sizeof(XVC_Fps))
-
-static const XVC_Fps dv_fps[] = {
-    {25, 1},
-    {30000, 1001},
-};
-
-#define len_dv_fps (sizeof(dv_fps) / sizeof(XVC_Fps))
-
-/** \brief global array storing all available codecs */
-const XVC_Codec xvc_codecs[NUMCODECS] = {
+/**
+ * Available video codecs.
+ */
+const XVC_VidCodec xvc_video_codecs[] = {
+	{
+		"NONE",
+		N_("NONE"),
+		CODEC_ID_NONE
+	},
     {
-     "NONE",
-     N_("NONE"),
-     CODEC_ID_NONE,
-     {0, 1},
-     NULL,
-     0,
-     NULL,
-     0},
-#ifdef USE_FFMPEG
+		"PGM",
+		N_("Portable Graymap"),
+		CODEC_ID_PGM
+	},
     {
-     "PGM",
-     N_("Portable Graymap"),
-     CODEC_ID_PGM,
-     {24, 1},
-     one_to_hundred_range,
-     len_one_to_hundred_range,
-     NULL,
-     0},
+		"PPM",
+		N_("Portable Pixmap"),
+		CODEC_ID_PPM
+	},
     {
-     "PPM",
-     N_("Portable Pixmap"),
-     CODEC_ID_PPM,
-     {24, 1},
-     one_to_hundred_range,
-     len_one_to_hundred_range,
-     NULL,
-     0},
+		"PNG",
+		N_("Portable Network Graphics"),
+		CODEC_ID_PNG
+	},
     {
-     "PNG",
-     N_("Portable Network Graphics"),
-     CODEC_ID_PNG,
-     {24, 1},
-     one_to_hundred_range,
-     len_one_to_hundred_range,
-     NULL,
-     0},
+		"JPEG",
+		N_("Joint Picture Expert Group"),
+		CODEC_ID_MJPEG
+	},
     {
-     "JPEG",
-     N_("Joint Picture Expert Group"),
-     CODEC_ID_MJPEG,
-     {24, 1},
-     one_to_hundred_range,
-     len_one_to_hundred_range,
-     NULL,
-     0},
-#ifndef DISABLE_PATENTED
+		"MPEG1",
+		N_("MPEG 1"),
+		CODEC_ID_MPEG1VIDEO
+	},
     {
-     "MPEG1",
-     N_("MPEG 1"),
-     CODEC_ID_MPEG1VIDEO,
-     {24, 1},
-     NULL,
-     0,
-     mpeg1_fps,
-     len_mpeg1_fps},
+		"MJPEG",
+		N_("MJPEG"),
+		CODEC_ID_MJPEG
+	},
     {
-     "MJPEG",
-     N_("MJPEG"),
-     CODEC_ID_MJPEG,
-     {24, 1},
-     mpeg4_range,                      /* this is actually MPEG4 ... dunno if
-                                        * this is the same here */
-     len_mpeg4_range,
-     NULL,
-     0},
+		"MPEG4",
+		N_("MPEG 4 (DIVX)"),
+		CODEC_ID_MPEG4
+	},
     {
-     "MPEG4",
-     N_("MPEG 4 (DIVX)"),
-     CODEC_ID_MPEG4,
-     {24, 1},
-     mpeg4_range,
-     len_mpeg4_range,
-     NULL,
-     0},
+		"MS_DIV2",
+		N_("Microsoft DIVX 2"),
+		CODEC_ID_MSMPEG4V2
+	},
     {
-     "MS_DIV2",
-     N_("Microsoft DIVX 2"),
-     CODEC_ID_MSMPEG4V2,
-     {24, 1},
-     mpeg4_range,                      /* this is actually MPEG4 ... dunno if
-                                        * this is the same here */
-     len_mpeg4_range,
-     NULL,
-     0},
+		"MS_DIV3",
+		N_("Microsoft DIVX 3"),
+		CODEC_ID_MSMPEG4V3
+	},
     {
-     "MS_DIV3",
-     N_("Microsoft DIVX 3"),
-     CODEC_ID_MSMPEG4V3,
-     {24, 1},
-     mpeg4_range,                      /* this is actually MPEG4 ... dunno if
-                                        * this is the same here */
-     len_mpeg4_range,
-     NULL,
-     0},
-#endif     // DISABLE_PATENTED
+		"FFV1",
+		N_("FFmpeg Video 1"),
+		CODEC_ID_FFV1
+	},
     {
-     "FFV1",
-     N_("FFmpeg Video 1"),
-     CODEC_ID_FFV1,
-     {24, 1},
-     one_to_hundred_range,
-     len_one_to_hundred_range,
-     NULL,
-     0},
-#ifndef DISABLE_PATENTED
+		"FLASH_VIDEO",
+		N_("Flash Video"),
+		CODEC_ID_FLV1
+	},
     {
-     "FLASH_VIDEO",
-     N_("Flash Video"),
-     CODEC_ID_FLV1,
-     {24, 1},
-     mpeg4_range,                      /* this is actually MPEG4 ... dunno if
-                                        * this is the same here */
-     len_mpeg4_range,
-     NULL,
-     0},
+		"FLASH_SV",
+		N_("Flash Screen Video"),
+		CODEC_ID_FLASHSV
+	},
     {
-     "FLASH_SV",
-     N_("Flash Screen Video"),
-     CODEC_ID_FLASHSV,
-     {24, 1},
-     one_to_hundred_range,
-     len_one_to_hundred_range,
-     NULL,
-     0},
-#endif     // DISABLE_PATENTED
+		"FLASH_SV2",
+		N_("Flash Screen Video 2"),
+		CODEC_ID_FLASHSV2
+	},
     {
-     "DV",
-     N_("DV Video"),
-     CODEC_ID_DVVIDEO,
-     {25, 1},
-     NULL,
-     0,
-     dv_fps,
-     len_dv_fps},
-#ifndef DISABLE_PATENTED
+		"DV",
+		N_("DV Video"),
+		CODEC_ID_DVVIDEO
+	},
     {
-     "MPEG2",
-     N_("MPEG2 Video"),
-     CODEC_ID_MPEG2VIDEO,
-     {24, 1},
-     NULL,
-     0,
-     mpeg1_fps,
-     len_mpeg1_fps},
-#endif     // DISABLE_PATENTED
-#ifdef HAVE_LIBTHEORA
+		"MPEG2",
+		N_("MPEG2 Video"),
+		CODEC_ID_MPEG2VIDEO
+	},
     {
-     "THEORA",
-     N_("Ogg Theora"),
-     CODEC_ID_THEORA,
-     {24, 1},
-     mpeg4_range,                      /* this is actually MPEG4 ... dunno if
-                                        * this is the same here */
-     len_mpeg4_range,
-     NULL,
-     0},
-#endif     // HAVE_LIBTHEORA
-#ifndef DISABLE_PATENTED
-    {
-     "SVQ1",
-     N_("Soerensen VQ 1"),
-     CODEC_ID_SVQ1,
-     {24, 1},
-     mpeg4_range,                      /* this is actually MPEG4 ... dunno if
-                                        * this is the same here */
-     len_mpeg4_range,
-     NULL,
-     0}
-#endif     // DISABLE_PATENTED
-#endif     // USE_FFMPEG
+		"THEORA",
+		N_("Ogg Theora"),
+		CODEC_ID_THEORA
+	},
+	{
+		"SVQ1",
+		N_("Soerensen VQ 1"),
+		CODEC_ID_SVQ1
+	},
+	{
+		"VP6",
+		N_("VP6"),
+		CODEC_ID_VP6
+	},
+	{
+		"H264",
+		N_("MPEG-4 Part 10 (h. 264)"),
+		CODEC_ID_H264
+	}
 };
 
 /**
- * \brief global array storing all available audio codecs
+ * Available audio codecs.
  */
-const XVC_AuCodec xvc_audio_codecs[NUMAUCODECS] = {
+const XVC_AuCodec xvc_audio_codecs[] = {
     {
-     "NONE",
-     N_("NONE"),
-     CODEC_ID_NONE}
-#ifdef USE_FFMPEG
-#ifdef HAVE_FFMPEG_AUDIO
-#ifndef DISABLE_PATENTED
-    , {
-       "MP2",
-       N_("MPEG2"),
-       CODEC_ID_MP2}
-#ifdef HAVE_LIBMP3LAME
-    , {
-       "MP3",
-       N_("MPEG2 Layer 3"),
-       CODEC_ID_MP3}
-#endif     // HAVE_LIBMP3LAME
-#endif     // DISABLE_PATENTED
-    , {
-       "VORBIS",
-       N_("Ogg Vorbis"),
-       CODEC_ID_VORBIS}
-#ifndef DISABLE_PATENTED
-    , {
-       "AC3",
-       N_("Dolby Digital AC-3"),
-       CODEC_ID_AC3}
-    , {
-       "PCM16",
-       N_("PCM"),
-       CODEC_ID_PCM_S16LE}
-#endif     // DISABLE_PATENTED
-#endif     // HAVE_FFMPEG_AUDIO
-#endif     // USE_FFMPEG
+		"NONE",
+	     N_("NONE"),
+    	 CODEC_ID_NONE
+	},
+	{
+		"MP2",
+		N_("MPEG2"),
+		CODEC_ID_MP2
+	},
+	{
+		"MP3",
+		N_("MPEG2 Layer 3"),
+		CODEC_ID_MP3
+	},
+	{
+		"VORBIS",
+		N_("Ogg Vorbis"),
+		CODEC_ID_VORBIS
+	},
+	{
+		"AC3",
+		N_("Dolby Digital AC-3"),
+		CODEC_ID_AC3
+	},
+	{
+		"PCM16",
+		N_("PCM"),
+		CODEC_ID_PCM_S16LE
+	},
+	{
+		"WMA1",
+		N_("Windows Media Audio v1"),
+		CODEC_ID_WMAV1
+	},
+	{
+		"WMA2",
+		N_("Windows Media Audio v2"),
+		CODEC_ID_WMAV2
+	},
+	{
+		"AAC",
+		N_("Advanced Audio Coding"),
+		CODEC_ID_AAC
+	},
+	{
+		"SPEEX",
+		N_("Speex"),
+		CODEC_ID_SPEEX
+	}
 };
+
+
 
 /*
  * arrays with extensions, allowed video and audio codecs for use in
  * the global xvc_formats array
  */
-static const char *extension_xwd[] = { "xwd" };
+static const XVC_VidCodecId *xwd_allowed_vid_codecs[] = { VID_CODEC_NONE };
+static const char *xwd_extensions[] = { "xwd" };
 
-#define len_extension_xwd (sizeof(extension_xwd) / sizeof(char*))
+static const XVC_VidCodecId *pgm_allowed_vid_codecs[] = { VID_CODEC_PGM };
+static const char *pgm_extensions[] = { "pgm" };
 
-#ifdef USE_FFMPEG
-static const char *extension_pgm[] = { "pgm" };
+static const XVC_VidCodecId *ppm_allowed_vid_codecs[] = { VID_CODEC_PPM };
+static const char *ppm_extensions[] = { "ppm" };
 
-#define len_extension_pgm (sizeof(extension_pgm) / sizeof(char*))
+static const XVC_VidCodecId *png_allowed_vid_codecs[] = { VID_CODEC_PNG };
+static const char *png_extensions[] = { "png" };
 
-static const char *extension_ppm[] = { "ppm" };
+static const XVC_VidCodecId *jpg_allowed_vid_codecs = { VID_CODEC_JPEG };
+static const char *jpg_extensions[] = { "jpg", "jpeg" };
 
-#define len_extension_ppm (sizeof(extension_ppm) / sizeof(char*))
 
-static const char *extension_png[] = { "png" };
-
-#define len_extension_png (sizeof(extension_png) / sizeof(char*))
-
-static const char *extension_jpg[] = { "jpg", "jpeg" };
-
-#define len_extension_jpg (sizeof(extension_jpg) / sizeof(char*))
-
-#ifndef DISABLE_PATENTED
-static const char *extension_avi[] = { "avi" };
-
-#define len_extension_avi (sizeof(extension_avi) / sizeof(char*))
-
-static const char *extension_mpg[] = { "mpeg", "mpg" };
-
-#define len_extension_mpg (sizeof(extension_mpg) / sizeof(char*))
-
-static const char *extension_asf[] = { "asf" };
-
-#define len_extension_asf (sizeof(extension_asf) / sizeof(char*))
-
-static const char *extension_flv[] = { "flv", "flv1" };
-
-#define len_extension_flv (sizeof(extension_flv) / sizeof(char*))
-
-static const char *extension_swf[] = { "swf" };
-
-#define len_extension_swf (sizeof(extension_swf) / sizeof(char*))
-#endif     // DISABLE_PATENTED
-
-static const char *extension_dv[] = { "dv" };
-
-#define len_extension_dv (sizeof(extension_dv) / sizeof(char*))
-
-#ifndef DISABLE_PATENTED
-static const char *extension_m1v[] = { "m1v", "vcd" };
-
-#define len_extension_m1v (sizeof(extension_m1v) / sizeof(char*))
-
-static const char *extension_m2v[] = { "m2v", "svcd" };
-
-#define len_extension_m2v (sizeof(extension_m2v) / sizeof(char*))
-
-static const char *extension_dvd[] = { "vob", "dvd" };
-
-#define len_extension_dvd (sizeof(extension_dvd) / sizeof(char*))
-
-static const char *extension_mov[] = { "mov", "qt" };
-
-#define len_extension_mov (sizeof(extension_mov) / sizeof(char*))
-#endif     // DISABLE_PATENTED
-
-static const char *extension_ogg[] = { "ogg" };
-
-#define len_extension_ogg (sizeof(extension_ogg) / sizeof(char*))
-
-static const XVC_CodecID allowed_vid_codecs_pgm[] = { CODEC_PGM };
-
-#define len_allowed_vid_codecs_pgm (sizeof(allowed_vid_codecs_pgm) / \
-    sizeof(XVC_CodecID))
-
-static const XVC_CodecID allowed_vid_codecs_ppm[] = { CODEC_PPM };
-
-#define len_allowed_vid_codecs_ppm (sizeof(allowed_vid_codecs_ppm) / \
-    sizeof(XVC_CodecID))
-
-static const XVC_CodecID allowed_vid_codecs_png[] = { CODEC_PNG };
-
-#define len_allowed_vid_codecs_png (sizeof(allowed_vid_codecs_png) / \
-    sizeof(XVC_CodecID))
-
-static const XVC_CodecID allowed_vid_codecs_jpg[] = { CODEC_JPEG };
-
-#define len_allowed_vid_codecs_jpg (sizeof(allowed_vid_codecs_jpg) / \
-    sizeof(XVC_CodecID))
-
-#ifdef HAVE_LIBTHEORA
-static const XVC_CodecID allowed_vid_codecs_ogg[] = { CODEC_THEORA };
-#endif // HAVE_LIBTHEORA
-
-#define len_allowed_vid_codecs_ogg (sizeof(allowed_vid_codecs_ogg) / \
-    sizeof(XVC_CodecID))
-
-#ifndef DISABLE_PATENTED
-static const XVC_CodecID allowed_vid_codecs_avi[] = {
-    CODEC_MPEG1,
-    CODEC_MJPEG,
-    CODEC_MPEG4,
-    CODEC_MSDIV2,
-    CODEC_MPEG2,
-#ifdef HAVE_LIBTHEORA
-    CODEC_THEORA,
-#endif     // HAVE_LIBTHEORA
-    CODEC_DV,
-    CODEC_FFV1
+static const XVC_VidCodecId *avi_allowed_vid_codecs[] = {
+	VID_CODEC_NONE, 
+    VID_CODEC_MPEG1,
+	VID_CODEC_MJPEG,
+    VID_CODEC_MPEG4,
+    VID_CODEC_MSDIV2,
+    VID_CODEC_MPEG2,
+    VID_CODEC_THEORA,
+    VID_CODEC_DV,
+    VID_CODEC_FFV1
 };
-
-#define len_allowed_vid_codecs_avi (sizeof(allowed_vid_codecs_avi) / \
-    sizeof(XVC_CodecID))
-
-static const XVC_CodecID allowed_vid_codecs_asf[] = { CODEC_MSDIV3 };
-
-#define len_allowed_vid_codecs_asf (sizeof(allowed_vid_codecs_asf) / \
-    sizeof(XVC_CodecID))
-
-static const XVC_CodecID allowed_vid_codecs_flv[] =
-    { CODEC_FLV, CODEC_FLASHSV };
-
-#define len_allowed_vid_codecs_flv (sizeof(allowed_vid_codecs_flv) / \
-    sizeof(XVC_CodecID))
-
-static const XVC_CodecID allowed_vid_codecs_swf[] = { CODEC_FLV, CODEC_MJPEG };
-
-#define len_allowed_vid_codecs_swf (sizeof(allowed_vid_codecs_swf) / \
-    sizeof(XVC_CodecID))
-
-static const XVC_CodecID allowed_vid_codecs_dv[] = { CODEC_DV, CODEC_MJPEG };
-#else      // DISABLE_PATENTED
-static const XVC_CodecID allowed_vid_codecs_dv[] = { CODEC_DV };
-#endif     // DISABLE_PATENTED
-
-#define len_allowed_vid_codecs_dv (sizeof(allowed_vid_codecs_dv) / \
-    sizeof(XVC_CodecID))
-
-#ifndef DISABLE_PATENTED
-static const XVC_CodecID allowed_vid_codecs_mpeg1[] = { CODEC_MPEG1 };
-
-#define len_allowed_vid_codecs_mpeg1 (sizeof(allowed_vid_codecs_mpeg1) / \
-    sizeof(XVC_CodecID))
-
-static const XVC_CodecID allowed_vid_codecs_mpeg2[] = { CODEC_MPEG2 };
-
-#define len_allowed_vid_codecs_mpeg2 (sizeof(allowed_vid_codecs_mpeg2) / \
-    sizeof(XVC_CodecID))
-
-static const XVC_CodecID allowed_vid_codecs_mov[] = {
-    CODEC_MPEG4,
-    CODEC_SVQ1,
-    CODEC_DV
-};
-
-#define len_allowed_vid_codecs_mov (sizeof(allowed_vid_codecs_mov) / \
-    sizeof(XVC_CodecID))
-
-#ifdef HAVE_FFMPEG_AUDIO
-static const XVC_AuCodecID allowed_au_codecs_avi[] = {
-    AU_CODEC_MP2,
-#ifdef HAVE_LIBMP3LAME
-    AU_CODEC_MP3,
-#endif     // HAVE_LIBMP3LAME
+static const XVC_AuCodecId *avi_allowed_au_codecs[] = {
+	AU_CODEC_NONE,
+	AU_CODEC_MP2,
+	AU_CODEC_MP3,
     AU_CODEC_VORBIS,
     AU_CODEC_PCM16
 };
+static const char *avi_extensions[] = { "avi" };
 
-#define len_allowed_au_codecs_avi (sizeof(allowed_au_codecs_avi) / \
-    sizeof(XVC_AuCodecID))
 
-static const XVC_AuCodecID au_codecs_mp2_and_mp3[] = {
-#ifdef HAVE_LIBMP3LAME
-    AU_CODEC_MP3,
-#endif     // HAVE_LIBMP3LAME
-    AU_CODEC_MP2
+static const XVC_VidCodecId *asf_allowed_vid_codecs[] = {
+	VID_CODEC_MSDIV3
 };
+static const XVC_AuCodecId *asf_allowed_au_codecs[] = {
+	AU_CODEC_NONE,
+	AU_CODEC_WMA1,
+	AU_CODEC_WMA2
+};
+static const char *asf_extensions[] = { "asf" };
 
-#define len_au_codecs_mp2_and_mp3 (sizeof(au_codecs_mp2_and_mp3) / \
-    sizeof(XVC_AuCodecID))
 
-#ifdef HAVE_LIBMP3LAME
-static const XVC_AuCodecID au_codecs_mp3[] = { AU_CODEC_MP3 };
+static const XVC_VidCodecId *flv_allowed_vid_codecs[] = {
+	VID_CODEC_FLV,
+	VID_CODEC_MJPEG,
+	VID_CODEC_VP6,
+	VID_CODEC_FLASHSV,
+	VID_CODEC_H264
+};
+static const XVC_AuCodecId *flv_allowed_au_codecs[] = {
+	AU_CODEC_NONE,
+	AU_CODEC_MP3,
+    AU_CODEC_PCM16,
+	AU_CODEC_SPEEX,
+	AU_CODEC_AAC
+};
+static const char *flv_extensions[] = { "flv" };
 
-#define len_au_codecs_mp3 (sizeof(au_codecs_mp3) / \
-    sizeof(XVC_AuCodecID))
-#endif     // HAVE_LIBMP3LAME
 
-static const XVC_AuCodecID au_codecs_mp2_and_pcm[] = {
+
+static const XVC_VidCodecId *swf_allowed_vid_codecs[] = {
+	VID_CODEC_FLV,
+	VID_CODEC_MJPEG,
+	VID_CODEC_VP6
+};
+static const XVC_AuCodecId *swf_allowed_au_codecs[] = {
+	AU_CODEC_NONE,
+	AU_CODEC_MP3
+};
+static const char *swf_extensions[] = { "swf" };
+
+
+
+static const XVC_VidCodecId *dv_allowed_vid_codecs[] = {
+	VID_CODEC_DV,
+};
+static const XVC_AuCodecId *dv_allowed_au_codecs[] = {
+    AU_CODEC_NONE,
     AU_CODEC_MP2,
     AU_CODEC_PCM16
 };
+static const char *dv_extensions[] = { "dv" };
 
-#define len_au_codecs_mp2_and_pcm (sizeof(au_codecs_mp2_and_pcm) / \
-    sizeof(XVC_AuCodecID))
 
-static const XVC_AuCodecID au_codecs_mp2[] = { AU_CODEC_MP2 };
 
-#define len_au_codecs_mp2 (sizeof(au_codecs_mp2) / \
-    sizeof(XVC_AuCodecID))
+static const XVC_VidCodecId *mpeg1_allowed_vid_codecs[] = {
+	VID_CODEC_MPEG1
+};
+static const XVC_AuCodecId *mpeg1_allowed_au_codecs[] = {
+    AU_CODEC_NONE,
+    AU_CODEC_MP2
+};
+static const char *mpeg1_extensions[] = { "m1v", "vcd", "mpeg", "mpg" };
 
-static const XVC_AuCodecID au_codecs_ac3[] = { AU_CODEC_AC3 };
 
-#define len_au_codecs_ac3 (sizeof(au_codecs_ac3) / \
-    sizeof(XVC_AuCodecID))
 
-#endif     // HAVE_FFMPEG_AUDIO
-#endif     // DISABLE_PATENTED
-#ifdef HAVE_FFMPEG_AUDIO
+static const XVC_VidCodecId *mpeg2_allowed_vid_codecs[] = {
+	VID_CODEC_MPEG2
+};
+static const XVC_AuCodecId *mpeg2_allowed_au_codecs[] = {
+	AU_CODEC_NONE,
+	AU_CODEC_MP2,
+	AU_CODEC_AC3
+};
+static const char *mpeg2_extensions[] = { "m2v", "svcd", "mpg", "mpeg" };
 
-static const XVC_AuCodecID allowed_au_codecs_ogg[] = { AU_CODEC_VORBIS };
 
-#define len_allowed_au_codecs_ogg (sizeof(allowed_au_codecs_ogg) / \
-    sizeof(XVC_AuCodecID))
 
-#endif     // HAVE_FFMPEG_AUDIO
-#endif     // USE_FFMPEG
+static const char *vob_extensions[] = { "vob", "dvd" };
+
+
+
+static const XVC_VidCodecId *mov_allowed_vid_codecs[] = {
+	VID_CODEC_NONE, 
+	VID_CODEC_MPEG4,
+    VID_CODEC_SVQ1,
+	VID_CODEC_H264,
+    VID_CODEC_DV
+};
+static const XVC_AuCodecId *mov_allowed_au_codecs[] = {
+	AU_CODEC_NONE,
+    AU_CODEC_PCM16,
+	AU_CODEC_MP2,
+	AU_CODEC_MP3,
+    AU_CODEC_AAC
+};
+static const char *mov_extensions[] = { "mov", "qt", "mp4" };
+
+
+
+static const XVC_VidCodecId *ogg_allowed_vid_codecs[] = {
+	VID_CODEC_NONE, 
+	VID_CODEC_MPEG4,
+	VID_CODEC_H264,
+	VID_CODEC_THEORA
+};
+static const XVC_AuCodecId *ogg_allowed_au_codecs[] = {
+	AU_CODEC_NONE,
+    AU_CODEC_PCM16,
+	AU_CODEC_MP2,
+	AU_CODEC_MP3,
+	AU_CODEC_VORBIS,
+    AU_CODEC_AAC
+};
+static const char *ogg_extensions[] = { "ogg" };
+
+
 
 /**
- * \brief global array storing all available file formats
+ * Global array storing all available file formats and containers
  */
-const XVC_FFormat xvc_formats[NUMCAPS] = {
+const XVC_FFormat xvc_formats[] = {
+	// Single image formats
     {
-     "NONE",
-     N_("NONE"),
-     NULL,
-     CODEC_NONE,
-     NULL,
-     0,
-     AU_CODEC_NONE,
-     NULL,
-     0,
-     NULL,
-     0},
+		"xwd",
+		N_("X11 Window Dump"),
+		NULL,
+		VID_CODEC_NONE,
+		xwd_allowed_vid_codecs,
+		AU_CODEC_NONE,
+		NULL,
+		xwd_extensions
+	},
+	{
+		"pgm",
+		N_("Portable Graymap File"),
+		NULL,
+		VID_CODEC_PGM,
+		pgm_allowed_vid_codecs,
+		AU_CODEC_NONE,
+		NULL,
+		pgm_extensions
+	},
     {
-     "xwd",
-     N_("X11 Window Dump"),
-     NULL,
-     CODEC_NONE,
-     NULL,
-     0,
-     AU_CODEC_NONE,
-     NULL,
-     0,
-     extension_xwd,
-     len_extension_xwd}
-#ifdef USE_FFMPEG
-    , {
-       "pgm",
-       N_("Portable Graymap File"),
-       NULL,
-       CODEC_PGM,
-       allowed_vid_codecs_pgm,
-       len_allowed_vid_codecs_pgm,
-       AU_CODEC_NONE,
-       NULL,
-       0,
-       extension_pgm,
-       len_extension_pgm},
+		"ppm",
+		N_("Portable Anymap File"),
+		NULL,
+		VID_CODEC_PPM,
+		ppm_allowed_vid_codecs,
+		AU_CODEC_NONE,
+		NULL,
+		ppm_extensions
+	},
     {
-     "ppm",
-     N_("Portable Anymap File"),
-     NULL,
-     CODEC_PPM,
-     allowed_vid_codecs_ppm,
-     len_allowed_vid_codecs_ppm,
-     AU_CODEC_NONE,
-     NULL,
-     0,
-     extension_ppm,
-     len_extension_ppm},
+		"png",
+		N_("Portable Network Graphics File"),
+		NULL,
+		VID_CODEC_PNG,
+		png_allowed_vid_codecs,
+		AU_CODEC_NONE,
+		NULL,
+		png_extensions
+	},
     {
-     "png",
-     N_("Portable Network Graphics File"),
-     NULL,
-     CODEC_PNG,
-     allowed_vid_codecs_png,
-     len_allowed_vid_codecs_png,
-     AU_CODEC_NONE,
-     NULL,
-     0,
-     extension_png,
-     len_extension_png},
+		"jpg",
+		N_("Joint Picture Expert Group"),
+		NULL,
+		VID_CODEC_JPEG,
+		png_allowed_vid_codecs,
+		AU_CODEC_NONE,
+		NULL,
+		jpg_extensions
+	},
+	// Video formats
     {
-     "jpg",
-     N_("Joint Picture Expert Group"),
-     NULL,
-     CODEC_JPEG,
-     allowed_vid_codecs_jpg,
-     len_allowed_vid_codecs_jpg,
-     AU_CODEC_NONE,
-     NULL,
-     0,
-     extension_jpg,
-     len_extension_jpg},
-#ifndef DISABLE_PATENTED
+		"avi",
+		N_("Microsoft Audio Video Interleaved File"),
+		"avi",
+		VID_CODEC_MSDIV2,
+		avi_allowed_vid_codecs,
+		AU_CODEC_MP3,
+		avi_allowed_au_codecs,
+		avi_extensions
+	},
     {
-     "avi",
-     N_("Microsoft Audio Video Interleaved File"),
-     "avi",
-     CODEC_MSDIV2,
-     allowed_vid_codecs_avi,
-     len_allowed_vid_codecs_avi,
-#ifdef HAVE_FFMPEG_AUDIO
-#ifdef HAVE_LIBMP3LAME
-     AU_CODEC_MP3,
-#else      // HAVE_LIBMP3LAME
-     AU_CODEC_MP2,
-#endif     // HAVE_LIBMP3LAME
-     allowed_au_codecs_avi,
-     len_allowed_au_codecs_avi,
-#else      // HAVE_FFMPEG_AUDIO
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_avi,
-     len_extension_avi},
+		"asf",
+		N_("Microsoft Advanced Systems Format"),
+		"asf",
+		VID_CODEC_MSDIV3,
+		asf_allowed_vid_codecs,
+		AU_CODEC_WMA2,
+		asf_allowed_au_codecs,
+		asf_extensions
+	},
     {
-     "divx",
-     N_("General AVI file (DIVX default)"),
-     "avi",
-     CODEC_MPEG4,
-     allowed_vid_codecs_avi,
-     len_allowed_vid_codecs_avi,
-#ifdef HAVE_FFMPEG_AUDIO
-#ifdef HAVE_LIBMP3LAME
-     AU_CODEC_MP3,
-#else      // HAVE_LIBMP3LAME
-     AU_CODEC_MP2,
-#endif     // HAVE_LIBMP3LAME
-     allowed_au_codecs_avi,
-     len_allowed_au_codecs_avi,
-#else      // HAVE_FFMPEG_AUDIO
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_mpg,
-     len_extension_mpg},
+		"flv1",
+		N_("Macromedia Flash Video Stream"),
+		"flv",
+		VID_CODEC_H264,
+		swf_allowed_vid_codecs,
+		AU_CODEC_MP3,
+		swf_allowed_au_codecs,
+		swf_extensions
+	},
     {
-     "asf",
-     N_("Microsoft Advanced Streaming Format"),
-     "asf",
-     CODEC_MSDIV3,
-     allowed_vid_codecs_asf,
-     len_allowed_vid_codecs_asf,
-     AU_CODEC_NONE,
-#ifdef HAVE_FFMPEG_AUDIO
-     au_codecs_mp2_and_mp3,
-     len_au_codecs_mp2_and_mp3,
-#else      // HAVE_FFMPEG_AUDIO
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_asf,
-     len_extension_asf},
+    	"swf",
+		N_("Macromedia Shockwave Flash File"),
+		"swf",
+		VID_CODEC_FLV,
+		flv_allowed_vid_codecs,
+		AU_CODEC_MP3,
+		flv_allowed_au_codecs,
+		flv_extensions
+	},
     {
-     "flv1",
-     N_("Macromedia Flash Video Stream"),
-     "flv",
-     CODEC_FLV,
-     allowed_vid_codecs_flv,
-     len_allowed_vid_codecs_flv,
-#ifdef HAVE_FFMPEG_AUDIO
-#ifdef HAVE_LIBMP3LAME
-     AU_CODEC_MP3,
-     au_codecs_mp3,
-     len_au_codecs_mp3,
-#else      // HAVE_LIBMP3LAME
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_LIBMP3LAME
-#else      // HAVE_FFMPEG_AUDIO
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_flv,
-     len_extension_flv},
+		"dv",
+		N_("DV Video Format"),
+		"dv",
+		VID_CODEC_DV,
+		dv_allowed_vid_codecs,
+		AU_CODEC_MP2,
+		dv_allowed_au_codecs,
+		dv_extensions
+	},
     {
-     "swf",
-     N_("Macromedia Shockwave Flash File"),
-     "swf",
-     CODEC_FLV,
-     allowed_vid_codecs_swf,
-     len_allowed_vid_codecs_swf,
-#ifdef HAVE_FFMPEG_AUDIO
-#ifdef HAVE_LIBMP3LAME
-     AU_CODEC_MP3,
-     au_codecs_mp3,
-     len_au_codecs_mp3,
-#else      // HAVE_LIBMP3LAME
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_LIBMP3LAME
-#else      // HAVE_FFMPEG_AUDIO
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_swf,
-     len_extension_swf},
-#endif     // DISABLE_PATENTED
+		"mpeg",
+		N_("MPEG-1 System Format (VCD)"),
+		"mpeg",
+		VID_CODEC_MPEG1,
+		mpeg1_allowed_vid_codecs,
+		AU_CODEC_MP2,
+		mpeg1_allowed_au_codecs,
+		mpeg1_extensions
+	},
     {
-     "dv",
-     N_("DV Video Format"),
-     "dv",
-     CODEC_DV,
-     allowed_vid_codecs_dv,
-     len_allowed_vid_codecs_dv,
-#ifdef HAVE_FFMPEG_AUDIO
-#ifndef DISABLE_PATENTED
-     AU_CODEC_MP2,
-     au_codecs_mp2_and_pcm,
-     len_au_codecs_mp2_and_pcm,
-#else      // DISABLE_PATENTED
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // DISABLE_PATENTED
-#else      // HAVE_FFMPEG_AUDIO
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_dv,
-     len_extension_dv},
-#ifndef DISABLE_PATENTED
+		"mpeg2",
+		N_("MPEG2 PS Format (SVCD)"),
+		"svcd",
+		VID_CODEC_MPEG2,
+		mpeg2_allowed_vid_codecs,
+		AU_CODEC_MP2,
+		mpeg2_allowed_au_codecs,
+		mpeg2_extensions
+	},
     {
-     "mpeg",
-     N_("MPEG1 System Format (VCD)"),
-     "mpeg",
-     CODEC_MPEG1,
-     allowed_vid_codecs_mpeg1,
-     len_allowed_vid_codecs_mpeg1,
-#ifdef HAVE_FFMPEG_AUDIO
-     AU_CODEC_MP2,
-     au_codecs_mp2,
-     len_au_codecs_mp2,
-#else
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_m1v,
-     len_extension_m1v},
+		"vob",
+		N_("MPEG2 PS format (DVD VOB)"),
+		"dvd",
+		VID_CODEC_MPEG2,
+		mpeg2_allowed_vid_codecs,
+		AU_CODEC_AC3,
+		mpeg2_allowed_au_codecs,
+		vob_extensions
+	},
     {
-     "mpeg2",
-     N_("MPEG2 PS Format (SVCD)"),
-     "svcd",
-     CODEC_MPEG2,
-     allowed_vid_codecs_mpeg2,
-     len_allowed_vid_codecs_mpeg2,
-#ifdef HAVE_FFMPEG_AUDIO
-     AU_CODEC_MP2,
-     au_codecs_mp2,
-     len_au_codecs_mp2,
-#else
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_m2v,
-     len_extension_m2v},
+		"mov",
+		N_("Quicktime Format"),
+		"mov",
+		VID_CODEC_MPEG4,
+		mov_allowed_vid_codecs,
+		AU_CODEC_MP2,
+		mov_allowed_au_codecs,
+		mov_extensions
+	},
     {
-     "vob",
-     N_("MPEG2 PS format (DVD VOB)"),
-     "dvd",
-     CODEC_MPEG2,
-     allowed_vid_codecs_mpeg2,
-     len_allowed_vid_codecs_mpeg2,
-#ifdef HAVE_FFMPEG_AUDIO
-     AU_CODEC_AC3,
-     au_codecs_ac3,
-     len_au_codecs_ac3,
-#else
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_dvd,
-     len_extension_dvd},
-    {
-     "mov",
-     N_("Quicktime Format"),
-     "mov",
-     CODEC_MPEG4,
-     allowed_vid_codecs_mov,
-     len_allowed_vid_codecs_mov,
-#ifdef HAVE_FFMPEG_AUDIO
-     AU_CODEC_MP2,
-     allowed_au_codecs_avi,
-     len_allowed_au_codecs_avi,
-#else      // HAVE_FFMPEG_AUDIO
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_mov,
-     len_extension_mov},
-#endif     // DISABLE_PATENTED
-    {
-     "ogg",
-     N_("Ogg Format"),
-     "ogg",
-#ifdef HAVE_LIBTHEORA
-     CODEC_THEORA,
-     allowed_vid_codecs_ogg,
-     len_allowed_vid_codecs_ogg,
-#else
-     CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_LIBTHEORA
-#ifdef HAVE_FFMPEG_AUDIO
-     AU_CODEC_VORBIS,
-     allowed_au_codecs_ogg,
-     len_allowed_au_codecs_ogg,
-#else      // HAVE_FFMPEG_AUDIO
-     AU_CODEC_NONE,
-     NULL,
-     0,
-#endif     // HAVE_FFMPEG_AUDIO
-     extension_ogg,
-     len_extension_ogg}
-#endif     // USE_FFMPEG
+		"ogg",
+		N_("Ogg Format"),
+		"ogg",
+		VID_CODEC_THEORA,
+		ogg_allowed_vid_codecs,
+		AU_CODEC_VORBIS,
+		ogg_allowed_au_codecs,
+		ogg_extensions,
+	}
 };
 
 /**
@@ -850,13 +536,9 @@ const XVC_FFormat xvc_formats[NUMCAPS] = {
  *      codec id we return -1 on failure
  */
 int
-xvc_trans_codec (XVC_CodecID xv_codec)
+xvc_trans_codec(XVC_VidCodecId xv_codec)
 {
-    int ret = -1;
-
-    if (xv_codec > 0 && xv_codec < NUMCODECS)
-        ret = xvc_codecs[xv_codec].ffmpeg_id;
-
+    int ret = xvc_video_codecs[xv_codec].ffmpeg_id;
     return ret;
 }
 
@@ -870,20 +552,23 @@ xvc_trans_codec (XVC_CodecID xv_codec)
  *      was found started at 1 (i. e. normal index + 1)
  */
 int
-xvc_is_valid_video_codec (XVC_FFormatID format, XVC_CodecID codec)
+xvc_is_valid_video_codec (XVC_FFormatId format, XVC_VidCodecId codec)
 {
-    int i = 0, found = 0;
+	if (! xvc_is_valid_format(format)) {
+		return 0;
+	}
 
-    if (format < 0 || format >= NUMCAPS ||
-        xvc_formats[format].num_allowed_vid_codecs == 0)
-        return found;
-    for (i = 0; i < xvc_formats[format].num_allowed_vid_codecs; i++) {
+	if (xvc_formats[format].allowed_vid_codecs == NULL) {
+		return 0;
+	}
+	
+    for (int i = 0; i < (sizeof xvc_formats[format].allowed_vid_codecs / sizeof(XVC_VidCodec)); i++) {
         if (xvc_formats[format].allowed_vid_codecs[i] == codec) {
-            found = ++i;
-            return found;
+            return 1;
         }
     }
-    return found;
+
+    return 0;
 }
 
 /**
@@ -896,23 +581,40 @@ xvc_is_valid_video_codec (XVC_FFormatID format, XVC_CodecID codec)
  *      was found started at 1 (i. e. normal index + 1)
  */
 int
-xvc_is_valid_audio_codec (XVC_FFormatID format, XVC_AuCodecID codec)
+xvc_is_valid_audio_codec(XVC_FFormatId format, XVC_AuCodecId codec)
 {
-    int i = 0;
-    int found = 0;
+	if (! xvc_is_valid_format(format)) {
+		return 0;
+	}
 
-    if (format < 0 || format >= NUMCAPS ||
-        xvc_formats[format].num_allowed_au_codecs == 0)
-        return found;
-
-    for (i = 0; i < xvc_formats[format].num_allowed_au_codecs; i++) {
+	if (xvc_formats[format].allowed_au_codecs == NULL && codec != AU_CODEC_NONE) {
+		return 0;
+	}
+	
+	for (int i = 0; i < (sizeof xvc_formats[format].allowed_au_codecs / sizeof(XVC_AuCodec)); i++) {
         if (xvc_formats[format].allowed_au_codecs[i] == codec) {
-            found = ++i;
-            return found;
+            return 1;
         }
     }
-    return found;
+
+	return 0;
 }
+
+
+int
+xvc_is_valid_format(XVC_FFormatId format)
+{
+    if (format <= CAP_XWD) {
+		return 0;
+	}
+
+	if (format >= (sizeof xvc_formats /sizeof(XVC_FFormat))) {
+		return 0;
+	}
+
+	return 1;
+}	
+
 
 /**
  * \brief find target file format based on filename, i. e. the extension
@@ -921,34 +623,31 @@ xvc_is_valid_audio_codec (XVC_FFormatID format, XVC_AuCodecID codec)
  * @return the index number pointing to the array element for the format found
  *      in the global file xvc_formats array
  */
-XVC_FFormatID
+XVC_FFormatId
 xvc_codec_get_target_from_filename (const char *file)
 {
     char *ext = NULL;
-    int ret = 0, i, i2;
 
-    ext = rindex (file, '.');
+    ext = rindex(file, '.');
     if (ext == NULL) {
-        return ret;
+        return 0;
     }
     ext++;
 
-    for (i = 0; i < NUMCAPS; i++) {
-        if (xvc_formats[i].extensions) {
-            for (i2 = 0; i2 < xvc_formats[i].num_extensions; i2++) {
-                if (strcasecmp (ext, xvc_formats[i].extensions[i2]) == 0) {
-                    // then we have found the right extension in target n
-                    ret = i;
-                    return ret;
-                }
+    for (int i = 0; i < (sizeof(xvc_formats) / sizeof(XVC_FFormat)); i++) {
+        for (int j = 0; j < (sizeof(xvc_formats[i].extensions) / sizeof(char)); j++) {
+			if (strcasecmp (ext, xvc_formats[i].extensions[j]) == 0) {
+                return j;
             }
         }
     }
 
-    return ret;
+    return 0;
 }
 
+
 /**
+ * \/**
  * \brief checks if fps rate is valid for given codec
  *
  * @param fps the fps rate to test
@@ -960,79 +659,11 @@ xvc_codec_get_target_from_filename (const char *file)
  * @return 1 for fps is valid for given codec or 0 for not valid
  */
 int
-xvc_codec_is_valid_fps (XVC_Fps fps, XVC_CodecID codec, int exact)
+xvc_codec_is_valid_fps (XVC_Fps fps, XVC_VidCodecId codec, int exact)
 {
-#define DEBUGFUNCTION "xvc_codec_is_valid_fps()"
-    int found = 0;
-
-    if (xvc_codecs[codec].num_allowed_fps == 0 &&
-        xvc_codecs[codec].num_allowed_fps_ranges == 0)
-        return found;
-
-    if (xvc_get_index_of_fps_array_element (xvc_codecs[codec].num_allowed_fps,
-                                            xvc_codecs[codec].allowed_fps,
-                                            fps, exact) >= 0) {
-        found = 1;
-        return found;
-    }
-
-    if (xvc_codecs[codec].num_allowed_fps_ranges != 0) {
-        int i = 0;
-
-        for (i = 0; i < xvc_codecs[codec].num_allowed_fps_ranges; i++) {
-            XVC_FpsRange curr = xvc_codecs[codec].allowed_fps_ranges[i];
-
-            if (XVC_FPS_GTE (fps, curr.start) && XVC_FPS_LTE (fps, curr.end)) {
-                found = 1;
-                return found;
-            }
-        }
-    }
-
-    return found;
-#undef DEBUGFUNCTION
+    return 1;
 }
 
-/**
- * \brief gets the index number of a given fps value from an array of fps
- *      values
- *
- * @param size the size of the array of fps values
- * @param haystack array of XVC_Fps values
- * @param needle the fps to search for
- * @param exact if 1 the function looks for an exact match, if 0 it will accept
- *      an fps value as matching, if there is a valid fps value that is
- *      not more than 0.01 larger or smaller than the fps given
- * @return the index number of the fps value in the array or -1 if not found
- */
-int
-xvc_get_index_of_fps_array_element (int size,
-                                    const XVC_Fps * haystack,
-                                    XVC_Fps needle, int exact)
-{
-    int i, found = -1;
-
-    for (i = 0; i < size; i++) {
-        if (XVC_FPS_EQUAL (haystack[i], needle)) {
-            found = i;
-            return found;
-        }
-    }
-
-    if (!exact) {
-        for (i = 0; i < size; i++) {
-            double n, h;
-
-            h = (double) haystack[i].num / (double) haystack[i].den;
-            n = (double) needle.num / (double) needle.den;
-            if (fabs (n - h) < 0.01) {
-                found = i;
-                return found;
-            }
-        }
-    }
-    return found;
-}
 
 /**
  * \brief reads a string and returns an fps value

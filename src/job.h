@@ -146,7 +146,7 @@ void xvc_job_free ();
 void xvc_job_set_from_app_data (XVC_AppData * app);
 Job *xvc_job_ptr (void);
 void xvc_job_dump ();
-void xvc_job_set_save_function (XVC_FFormatID type);
+void xvc_job_set_save_function (XVC_FFormatId format);
 void xvc_job_set_colors ();
 
 void xvc_job_set_state (int state);

@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=net.jarre_de_the.Xvidcap
-Exec=/usr/local/bin/xvidcap
