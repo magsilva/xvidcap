@@ -3,8 +3,10 @@
 gladedir = $(datadir)/xvidcap/glade
 glade_DATA = gnome-xvidcap.glade \
 	pixmaps/xvidcap_logo.png
+EXTRA_DIST = $(glade_DATA)
 
-INCLUDES = \
+
+AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
@@ -16,7 +18,9 @@ AM_CFLAGS =\
 	 -std=c99
 	 -DDBUS_SERVICE_DIR=\""$(datadir)/dbus-1/service"\"
 
-bin_PROGRAMS = xvidcap xvidcap-dbus-client
+bin_PROGRAMS = \
+	xvidcap \
+	xvidcap-dbus-client
 
 xvidcap_SOURCES = \
     app_data.c \
@@ -55,21 +59,12 @@ xvidcap_SOURCES = \
     eggtrayicon.c \
     dbus-server-object.h \
     dbus-server-object.c
-
-
 xvidcap_LDADD = $(PACKAGE_LIBS)
-
 xvidcap_LDFLAGS = -export-dynamic
 
-EXTRA_DIST = $(glade_DATA)
-
-
 xvidcap_dbus_client_SOURCES = xvidcap-dbus-client.c
-
 xvidcap_dbus_client_LDADD = $(PACKAGE_LIBS)
-
 xvidcap_dbus_client_LDFLAGS = -export-dynamic
-
 
 # We don't want to install this header
 BUILT_SOURCES = xvidcap-dbus-glue.h xvidcap-client-bindings.h

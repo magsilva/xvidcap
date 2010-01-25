@@ -17,22 +17,10 @@ pkgdata_DATA = xvidcap.desktop \
 	xvidcap.png \
     ppm2mpeg.sh
 
-xvidcapdocdir = ${datadir}/doc/xvidcap
-xvidcapdoc_DATA = \
-	README\
-	COPYING\
-	AUTHORS\
-	ChangeLog
-
-EXTRA_DIST = $(xvidcapdoc_DATA) \
-    autogen.sh \
-    intltool-extract.in \
-    intltool-merge.in \
-    intltool-update.in \
+EXTRA_DIST = autogen.sh \
     xvidcap.png \
     xvidcap.desktop \
     ppm2mpeg.sh \
-    TODO.tasks \
     INSTALL \
     net.jarre_de_the.Xvidcap.service.in
 
@@ -44,12 +32,8 @@ dist-hook:
 			cp -p $$specfile $(distdir); \
 		fi \
 	done; \
-    mkdir $(distdir)/ffmpeg ; \
-    ( cd $(top_srcdir)/ffmpeg/ && tar cf - . | ( cd ../$(distdir)/ffmpeg && tar xf - ) ) ; \
     rm -rf `find $(distdir) -name CVS` ; \
-    rm -rf `find $(distdir) -name .svn` ; \
-    ( cd $(distdir)/ffmpeg/ && $(MAKE) distclean ) || ( echo "FAILED TO DISTCLEAN FFMPEG" && exit ) ; \
-    ( test -f $(distdir)/ffmpeg/config.log && rm $(distdir)/ffmpeg/config.log ) || echo "no ffmpeg config.log"
+    rm -rf `find $(distdir) -name .svn` ;
 
 install-exec-hook:
 	mkdir $(DESTDIR)$(datadir)/pixmaps ; \
@@ -71,4 +55,3 @@ install-doc:
 
 uninstall-doc: 
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) uninstall-doc
-
