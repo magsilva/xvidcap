@@ -9,11 +9,9 @@ service_DATA = $(service_in_files:.service.in=.service)
 $(service_DATA): $(service_in_files) Makefile
 	@SED@ -e "s|\@bindir\@|$(bindir)|" $<> $@
 
-doc_SUBDIRS = doc
-SUBDIRS = $(doc_SUBDIRS) \
+SUBDIRS = doc \
     src \
-    po \
-    debian
+    po
 
 pkgdata_DATA = xvidcap.desktop \
 	xvidcap.png \
