@@ -1085,7 +1085,7 @@ add_video_stream (AVFormatContext * oc, const XImage * image,
     }
     // fallback pix fmts
     if (st->codec->pix_fmt < 0) {
-        if (job->target >= CAP_MF) {
+        if (job->target >= CAP_AVI) {
             st->codec->pix_fmt = PIX_FMT_YUV420P;
         } else {
             st->codec->pix_fmt = PIX_FMT_RGB24;
@@ -1214,14 +1214,11 @@ xvc_ffmpeg_save_frame (FILE * fp, XImage * image)
         av_register_all ();
 
         // guess AVOutputFormat
-        if (job->target >= CAP_MF)
-            file_oformat =
-                guess_format (xvc_formats[job->target].ffmpeg_name, NULL, NULL);
+        if (job->target >= CAP_AVI)
+            file_oformat = guess_format (xvc_formats[job->target].ffmpeg_name, NULL, NULL);
         else {
             char tmp_fn[30];
-
-            snprintf (tmp_fn, 29, "test-%%d.%s",
-                      xvc_formats[job->target].extensions[0]);
+            snprintf (tmp_fn, 29, "test-%%d.%s", xvc_formats[job->target].extensions[0]);
             file_oformat = guess_format (NULL, tmp_fn, NULL);
         }
         if (!file_oformat) {
@@ -1257,7 +1254,7 @@ xvc_ffmpeg_save_frame (FILE * fp, XImage * image)
         fprintf(stderr, "The current pixfmt is %d, but the choosen one is %d\n", input_pixfmt, (input_pixfmt == PIX_FMT_PAL8 ? PIX_FMT_RGB24 : input_pixfmt));
         out_st = add_video_stream (output_file, image,
                      (input_pixfmt == PIX_FMT_PAL8 ? PIX_FMT_RGB24 : input_pixfmt),
-                      xvc_codecs[job->targetCodec].ffmpeg_id, job);
+                      xvc_video_codecs[job->targetCodec].ffmpeg_id, job);
 
         // FIXME: set params
         // memset (p_fParams, 0, sizeof(*p_fParams));
@@ -1363,7 +1360,7 @@ xvc_ffmpeg_save_frame (FILE * fp, XImage * image)
         }
         // file preparation needs to be done once for multi-frame capture
         // and multiple times for single-frame capture
-        if (job->target >= CAP_MF) {
+        if (job->target >= CAP_AVI) {
             // prepare output filenames and register protocols
             // after this output_file->filename should have the right
             // filename
@@ -1385,7 +1382,7 @@ xvc_ffmpeg_save_frame (FILE * fp, XImage * image)
         }
     }
 
-    if (job->target < CAP_MF) {
+    if (job->target < CAP_AVI) {
         // prepare output filenames and register protocols
         // after this output_file->filename should have the right filename
         prepareOutputFile (job->file, output_file, job->pic_no);
@@ -1458,7 +1455,7 @@ xvc_ffmpeg_save_frame (FILE * fp, XImage * image)
         do_video_out (output_file, out_st, outbuf, out_size);
     }
 
-    if (job->target < CAP_MF)
+    if (job->target < CAP_AVI)
         url_fclose (output_file->pb);
 
     /*
@@ -1513,7 +1510,7 @@ xvc_ffmpeg_clean ()
         /*
          * close file if multi-frame capture ... otherwise closed already
          */
-        if (job->target >= CAP_MF)
+        if (job->target >= CAP_AVI)
             url_fclose (output_file->pb);
         /*
          * free streams

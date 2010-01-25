@@ -319,19 +319,19 @@ xvc_job_ptr (void)
  * @param type the id of the target file format used
  */
 void
-xvc_job_set_save_function (XVC_FFormatID type)
+xvc_job_set_save_function (XVC_FFormatId type)
 {
-    if (type >= CAP_MF) {
+    if (type >= CAP_AVI) {
         job->clean = xvc_ffmpeg_clean;
-        if (job->targetCodec == CODEC_NONE) {
-            job->targetCodec = CODEC_MF;
+        if (job->targetCodec == VID_CODEC_NONE) {
+            job->targetCodec = VID_CODEC_MJPEG;
         }
         job->get_colors = xvc_ffmpeg_get_color_table;
         job->save = xvc_ffmpeg_save_frame;
-    } else if (type >= CAP_FFM) {
+    } else if (type >= CAP_AVI) {
         job->clean = xvc_ffmpeg_clean;
-        if (job->targetCodec == CODEC_NONE) {
-            job->targetCodec = CODEC_PGM;
+        if (job->targetCodec == VID_CODEC_NONE) {
+            job->targetCodec = VID_CODEC_PGM;
         }
         job->get_colors = xvc_ffmpeg_get_color_table;
         job->save = xvc_ffmpeg_save_frame;

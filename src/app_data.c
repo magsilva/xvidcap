@@ -584,7 +584,7 @@ xvc_appdata_validate(XVC_AppData *lapp, int mode, int *rc)
             }
 
         }
-    } else if (lapp->current_mode == 0 && !XVC_FPS_GT_ZERO (target->fps)) {
+    } else if (lapp->current_mode == 0) { // && target->fps < 0) {
         errors = errorlist_append (28, errors, lapp);
         if (!errors) {
             *rc = -1;
@@ -711,7 +711,7 @@ xvc_appdata_merge_captypeoptions (XVC_CapTypeOptions * cto, XVC_AppData * lapp)
         target->target = cto->target;
     if (cto->targetCodec > -1)
         target->targetCodec = cto->targetCodec;
-    if (XVC_FPS_GTE_ZERO (cto->fps))
+//    if (cto->fps > 0)
         target->fps = cto->fps;
     if (cto->time > -1)
         target->time = cto->time;

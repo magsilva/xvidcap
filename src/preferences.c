@@ -96,33 +96,13 @@ xvc_write_options_file ()
     fprintf (fp, "minimize_to_tray: %i\n", ((app->flags & FLG_TO_TRAY) ? 1 : 0));
 
     fprintf (fp, _("# file pattern for single-frame capture\n(this defines the filetype to write via the extension provided)\n"));
-    fprintf (fp, _("# valid extensions are: "));
-    for (n = CAP_NONE; n < CAP_MF; n++) {
-        if (xvc_formats[n].extensions) {
-            for (m = 0; m < xvc_formats[n].num_extensions; m++) {
-                fprintf (fp, ".%s ", xvc_formats[n].extensions[m]);
-            }
-        }
-    }
 	fprintf (fp, "\nsf_file: %s\n", app->single_frame.file);
 
 	fprintf (fp, _("# file format - use AUTO to select format through file extension\n"));
-    fprintf (fp, _("# Otherwise specify one of the following: "));
-    for (n = (CAP_NONE + 1); n < CAP_MF; n++) {
-        fprintf (fp, "%s", xvc_formats[n].name);
-        if (n < (CAP_MF - 1))
-            fprintf (fp, ", ");
-    }
     fprintf (fp, "\nsf_format: %s\n", xvc_formats[app->single_frame.target].name);
 
 	fprintf (fp, _("# video codec used by ffmpeg - use AUTO to auto-detect codec\n"));
-    fprintf (fp, _("# Otherwise specify one of the following: "));
-    for (n = (CODEC_NONE + 1); n < CODEC_MF; n++) {
-        fprintf (fp, "%s", xvc_codecs[n].name);
-        if (n < (CODEC_MF - 1))
-            fprintf (fp, ", ");
-    }
-	fprintf (fp, "\n#sf_codec: %s\n", xvc_codecs[app->single_frame.targetCodec].name);
+	fprintf (fp, "\n#sf_codec: %s\n", xvc_video_codecs[app->single_frame.targetCodec].name);
 	
     fprintf (fp, _("# audio codec\n"));
     fprintf (fp, "sf_au_codec: %s\n", "NONE");
@@ -165,41 +145,15 @@ xvc_write_options_file ()
 
     fprintf (fp, _("\n#options for multi-frame capture ...\n"));
     fprintf (fp, _("# file pattern\n# this defines the filetype to write via the extension provided\n"));
-    fprintf (fp, _("# valid extensions are: "));
-    for (n = CAP_FFM; n < NUMCAPS; n++) {
-        if (xvc_formats[n].extensions) {
-            for (m = 0; m < xvc_formats[n].num_extensions; m++) {
-                fprintf (fp, "%s ", xvc_formats[n].extensions[m]);
-            }
-        }
-    }
     fprintf (fp, "\nmf_file: %s\n", app->multi_frame.file);
 
 	fprintf (fp, _("# file format - use AUTO to select format through file extension\n"));
-    fprintf (fp, _("# Otherwise specify one of the following: "));
-    for (n = CAP_FFM; n < NUMCAPS; n++) {
-        fprintf (fp, "%s", xvc_formats[n].name);
-        if (NUMCAPS > (n + 1))
-            fprintf (fp, ", ");
-    }
     fprintf (fp, "\nmf_format: %s\n", xvc_formats[app->multi_frame.target].name);
 
 	fprintf (fp, _("# video codec used by ffmpeg - use AUTO to auto-detect codec\n"));
-    fprintf (fp, _("# Otherwise specify one of the following: "));
-    for (n = CODEC_MF; n < NUMCODECS; n++) {
-        fprintf (fp, "%s", xvc_codecs[n].name);
-        if (NUMCODECS > (n + 1))
-            fprintf (fp, ", ");
-    }
-    fprintf (fp, "\nmf_codec: %s\n", xvc_codecs[app->multi_frame.targetCodec].name);
+    fprintf (fp, "\nmf_codec: %s\n", xvc_video_codecs[app->multi_frame.targetCodec].name);
 	
     fprintf (fp, _("# audio codec used by ffmpeg - use AUTO to auto-detect audio codec\n"));
-    fprintf (fp, _("# Otherwise specify one of the following: "));
-    for (n = (AU_CODEC_NONE + 1); n < NUMAUCODECS; n++) {
-        fprintf (fp, "%s", xvc_audio_codecs[n].name);
-        if (NUMAUCODECS > (n + 1))
-            fprintf (fp, ", ");
-    }
     fprintf (fp, "\nmf_au_codec: %s\n", xvc_audio_codecs[app->multi_frame.au_targetCodec].name);
 	
     fprintf (fp, _("# frames per second\n# put as normal decimal number or a fraction like \"30000/10001\"\n"));
@@ -416,34 +370,27 @@ xvc_read_options_file()
 		        app->single_frame.file = strdup (value);
 		    }
 			if (strcasecmp (token, "sf_format") == 0) {
-		        int cap_index = 0, found_target = 0;
-
-		        for (cap_index = CAP_NONE; cap_index < NUMCAPS; cap_index++) {
-		            if (strcasecmp (xvc_formats[cap_index].name, token) ==
-		                0)
-		                found_target = cap_index;
+		        int found_target = 0;
+		        for (int i = 0; i < xvc_count_formats(); i++) {
+		            if (strcasecmp (xvc_formats[i].name, token) == 0)
+		                found_target = i;
 		        }
 		        app->single_frame.target = found_target;
 		    }
-			if (strcasecmp (token, "sf_codec") == 0) {
-		        int codec_index = 0, found_codec = 0;
-
-		        for (codec_index = CODEC_NONE; codec_index < NUMCODECS;
-		             codec_index++) {
-		            if (strcasecmp (xvc_codecs[codec_index].name, token) ==
-		                0)
-		                found_codec = codec_index;
+			if (strcasecmp(token, "sf_codec") == 0) {
+		        int found_codec = 0;
+		        for (int i = VID_CODEC_NONE; i < xvc_count_video_codecs(); i++) {
+		            if (strcasecmp (xvc_video_codecs[i].name, token) == 0)
+		                found_codec = i;
 		        }
 		        app->single_frame.targetCodec = found_codec;
 		    }
 		    if (strcasecmp (token, "sf_au_codec") == 0) {
-		        int auCodec_index = 0, found_auCodec = 0;
+		        int found_auCodec = 0;
 
-		        for (auCodec_index = AU_CODEC_NONE;
-		             auCodec_index < NUMAUCODECS; auCodec_index++) {
-		            if (strcasecmp
-		                (xvc_audio_codecs[auCodec_index].name, token) == 0)
-		                found_auCodec = auCodec_index;
+		        for (int i = AU_CODEC_NONE; i < xvc_count_audio_codecs(); i++) {
+		            if (strcasecmp(xvc_audio_codecs[i].name, token) == 0)
+		                found_auCodec = i;
 		        }
 		        app->single_frame.au_targetCodec = found_auCodec;
 		    }
@@ -494,42 +441,39 @@ xvc_read_options_file()
 			if (strcasecmp (token, "mf_format") == 0) {
 		        int n, a = -1;
 
-		        for (n = CAP_FFM; n < NUMCAPS; n++) {
+		        for (n = CAP_AVI; n < xvc_count_formats(); n++) {
 		            if (strcasecmp (value, xvc_formats[n].name) == 0)
 		                a = n;
 		        }
-		        if (strcasecmp (value, "NONE") == 0
-		            || strcasecmp (value, "AUTO") == 0) {
+		        if (strcasecmp (value, "NONE") == 0 || strcasecmp (value, "AUTO") == 0) {
 		            // flag set target by filename through setting
-		            // target to 0;
-		            a = CAP_NONE;
+		            a = CAP_AVI;
 		        }
-		        if (a < CAP_NONE) {
+		        if (a < 0) {
 		            fprintf (stderr, _("reading unsupported target from options file\nresetting to target auto-detection\n"));
-		            a = CAP_NONE;
+		            a = CAP_AVI;
 		        }
-		        if (a >= CAP_NONE)
-		            app->multi_frame.target = a;
+	            app->multi_frame.target = a;
 		    }
 			if (strcasecmp (token, "mf_codec") == 0) {
 		        int n, a = -1;
 
-		        for (n = CODEC_NONE; n < NUMCODECS; n++) {
-		            if (strcasecmp (value, xvc_codecs[n].name) == 0)
+		        for (n = VID_CODEC_NONE; n < xvc_count_video_codecs(); n++) {
+		            if (strcasecmp (value, xvc_video_codecs[n].name) == 0)
 		                a = n;
 		        }
 		        if (strcasecmp (value, "AUTO") == 0)
-		            a = CODEC_NONE;
-		        if (a < CODEC_NONE) {
+		            a = VID_CODEC_NONE;
+		        if (a < VID_CODEC_NONE) {
 		            fprintf (stderr, _("reading unsupported target codec (%i) from options file\nresetting to codec auto-detection\n"), a);
-		            a = CODEC_NONE;
+		            a = VID_CODEC_NONE;
 		        }
 		        app->multi_frame.targetCodec = a;
 		    }
 		    if (strcasecmp (token, "mf_au_codec") == 0) {
 		        int n, a = -1;
 
-		        for (n = AU_CODEC_NONE; n < NUMAUCODECS; n++) {
+		        for (n = AU_CODEC_NONE; n < xvc_count_audio_codecs(); n++) {
 		            if (strcasecmp (value, xvc_audio_codecs[n].name) == 0)
 		                a = n;
 		        }

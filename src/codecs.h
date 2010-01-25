@@ -175,6 +175,7 @@ int xvc_trans_codec(XVC_VidCodecId xv_codec);
 
 int xvc_is_valid_video_codec(XVC_FFormatId format, XVC_VidCodecId codec);
 
+
 int xvc_is_valid_audio_codec(XVC_FFormatId format, XVC_AuCodecId codec);
 
 int xvc_is_valid_format(XVC_FFormatId format);
@@ -186,5 +187,11 @@ int xvc_codec_is_valid_fps(XVC_Fps fps, XVC_VidCodecId codec, int exact);
 int xvc_get_index_of_fps_array_element(int size, const XVC_Fps *haystack, XVC_Fps needle, int exact);
 
 XVC_Fps xvc_read_fps_from_string(const char *fps_string);
+
+int xvc_count_audio_codecs();
+
+int xvc_count_video_codecs();
+
+int xvc_count_formats();
 
 #endif     // _xvc_CODECS_H__

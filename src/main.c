@@ -114,22 +114,7 @@ usage (char *prog)
     printf (_("[--audio_rate #] sample rate for audio capture\n"));
     printf (_("[--audio_bits #] bit rate for audio capture\n"));
     printf (_("[--audio_channels #] number of audio channels\n"));
-
-    printf (_("Supported output formats:\n"));
-    for (n = CAP_NONE; n < NUMCAPS; n++) {
-        if (xvc_formats[n].extensions) {
-            printf (" %s", _(xvc_formats[n].longname));
-            for (m = strlen (_(xvc_formats[n].longname)); m < 40; m++)
-                printf (" ");
-            printf ("(");
-            for (m = 0; m < xvc_formats[n].num_extensions; m++) {
-                printf (".%s", xvc_formats[n].extensions[m]);
-                if (xvc_formats[n].num_extensions > (m + 1))
-                    printf (", ");
-            }
-            printf (")\n");
-        }
-    }
+   
     exit (1);
 }
 
@@ -376,8 +361,8 @@ parse_cli_options (XVC_CapTypeOptions * tmp_capture_options, int argc,
                     int n, m = 0;
                     Boolean found = FALSE;
 
-                    for (n = 1; n < NUMCODECS; n++) {
-                        if (strcasecmp (optarg, xvc_codecs[n].name) == 0) {
+                    for (n = 1; n < xvc_count_video_codecs(); n++) {
+                        if (strcasecmp (optarg, xvc_video_codecs[n].name) == 0) {
                             found = TRUE;
                             m = n;
                         }
@@ -407,26 +392,26 @@ parse_cli_options (XVC_CapTypeOptions * tmp_capture_options, int argc,
 
                     printf (_("Available codecs for single-frame capture: "));
 
-                    for (n = 1; n < CAP_MF; n++) {
-                        for (m = 0; m < strlen (xvc_codecs[n].name); m++) {
-                            tmp_codec[m] = tolower (xvc_codecs[n].name[m]);
+                    for (n = 1; n < CAP_AVI; n++) {
+                        for (m = 0; m < strlen (xvc_video_codecs[n].name); m++) {
+                            tmp_codec[m] = tolower (xvc_video_codecs[n].name[m]);
                         }
-                        tmp_codec[strlen (xvc_codecs[n].name)] = '\0';
+                        tmp_codec[strlen (xvc_video_codecs[n].name)] = '\0';
                         printf ("%s", tmp_codec);
-                        if (n < (CAP_MF - 1))
+                        if (n < (CAP_AVI - 1))
                             printf (", ");
                     }
                     printf ("\n");
 
                     printf (_("Available codecs for multi-frame capture: "));
 
-                    for (n = CAP_MF; n < NUMCODECS; n++) {
-                        for (m = 0; m < strlen (xvc_codecs[n].name); m++) {
-                            tmp_codec[m] = tolower (xvc_codecs[n].name[m]);
+                    for (n = CAP_AVI; n < xvc_count_video_codecs(); n++) {
+                        for (m = 0; m < strlen (xvc_video_codecs[n].name); m++) {
+                            tmp_codec[m] = tolower (xvc_video_codecs[n].name[m]);
                         }
-                        tmp_codec[strlen (xvc_codecs[n].name)] = '\0';
+                        tmp_codec[strlen (xvc_video_codecs[n].name)] = '\0';
                         printf ("%s", tmp_codec);
-                        if (n < (NUMCODECS - 1))
+                        if (n < xvc_count_video_codecs() - 1)
                             printf (", ");
                     }
                     printf ("\n");
@@ -442,7 +427,7 @@ parse_cli_options (XVC_CapTypeOptions * tmp_capture_options, int argc,
                     int n, m = -1;
                     Boolean found = FALSE;
 
-                    for (n = CAP_NONE; n < NUMCAPS; n++) {
+                    for (n = 0; n < xvc_count_formats(); n++) {
                         if (strcasecmp (optarg, xvc_formats[n].name) == 0) {
                             found = TRUE;
                             m = n;
@@ -457,19 +442,12 @@ parse_cli_options (XVC_CapTypeOptions * tmp_capture_options, int argc,
                         if (m > -1) {
                             tmp_capture_options->target = m;
                         } else {
-                            fprintf (stderr,
-                                     _
-                                     ("Specified file format '%s' not supported with this binary."),
-                                     optarg);
-                            fprintf (stderr,
-                                     _
-                                     ("Resetting to file format auto-detection.\n"));
+                            fprintf(stderr, _("Specified file format '%s' not supported with this binary."), optarg);
+                            fprintf(stderr, _("Resetting to file format auto-detection.\n"));
                             tmp_capture_options->target = 0;
                         }
                     } else {
-                        fprintf (stderr,
-                                 _("Unknown file format '%s' specified.\n"),
-                                 optarg);
+                        fprintf(stderr, _("Unknown file format '%s' specified.\n"), optarg);
                         usage (_argv[0]);
                     }
                 }
@@ -485,15 +463,14 @@ parse_cli_options (XVC_CapTypeOptions * tmp_capture_options, int argc,
                          _argv[0], VERSION);
                     printf (_("Available file formats: "));
 
-                    for (n = CAP_NONE; n < NUMCAPS; n++) {
+                    for (n = 0; n < xvc_count_formats(); n++) {
                         if (xvc_formats[n].extensions) {
                             for (m = 0; m < strlen (xvc_formats[n].name); m++) {
-                                tmp_format[m] =
-                                    tolower (xvc_formats[n].name[m]);
+                                tmp_format[m] = tolower (xvc_formats[n].name[m]);
                             }
                             tmp_format[strlen (xvc_formats[n].name)] = '\0';
                             printf ("%s", tmp_format);
-                            if (n < (NUMCAPS - 1))
+                            if (n < xvc_count_formats() - 1)
                                 printf (", ");
                         }
                     }
@@ -509,7 +486,7 @@ parse_cli_options (XVC_CapTypeOptions * tmp_capture_options, int argc,
                     int n, m = 0;
                     Boolean found = FALSE;
 
-                    for (n = 1; n < NUMAUCODECS; n++) {
+                    for (n = 0; n < xvc_count_audio_codecs(); n++) {
                         if (strcasecmp (optarg, xvc_audio_codecs[n].name) == 0) {
                             found = TRUE;
                             m = n;
@@ -540,14 +517,14 @@ parse_cli_options (XVC_CapTypeOptions * tmp_capture_options, int argc,
                     printf (_
                             ("Available audio codecs for multi-frame capture: "));
 
-                    for (n = 1; n < NUMAUCODECS; n++) {
+                    for (n = 0; n < xvc_count_audio_codecs(); n++) {
                         for (m = 0; m < strlen (xvc_audio_codecs[n].name); m++) {
                             tmp_codec[m] =
                                 tolower (xvc_audio_codecs[n].name[m]);
                         }
                         tmp_codec[strlen (xvc_audio_codecs[n].name)] = '\0';
                         printf ("%s", tmp_codec);
-                        if (n < (NUMAUCODECS - 1))
+                        if (n < xvc_count_audio_codecs() - 1)
                             printf (", ");
                     }
                     printf ("\n");
@@ -624,7 +601,7 @@ merge_cli_options (XVC_CapTypeOptions * tmp_capture_options)
     else {
         current_mode_by_filename =
             xvc_codec_get_target_from_filename (tmp_capture_options->file);
-        if (current_mode_by_filename >= CAP_MF)
+        if (current_mode_by_filename >= CAP_AVI)
             current_mode_by_filename = 1;
         else
         if (current_mode_by_filename > 0)
@@ -640,7 +617,7 @@ merge_cli_options (XVC_CapTypeOptions * tmp_capture_options)
     if (tmp_capture_options->target < 0)
         current_mode_by_target = -1;
     else {
-        if (tmp_capture_options->target >= CAP_MF)
+        if (tmp_capture_options->target >= CAP_AVI)
             current_mode_by_target = 1;
         else
         if (tmp_capture_options->target > 0)
@@ -759,37 +736,25 @@ print_current_settings (XVC_CapTypeOptions * target)
 
     printf (_("Current settings:\n"));
     printf (_(" flags = %d\n"), app->flags);
-    printf (_(" capture mode = %s\n"),
-            ((app->current_mode == 0) ? _("single-frame") : _("multi-frame")));
+    printf (_(" capture mode = %s\n"), (app->current_mode == 0) ? _("single-frame") : _("multi-frame"));
     printf (_(" position = %ix%i"), app->area->width, app->area->height);
-    if (app->area->x >= 0)
+	if (app->area->x >= 0)
         printf ("+%i+%i", app->area->x, app->area->y);
     printf ("\n");
     printf (_(" rescale output to = %i\n"), app->rescale);
-    printf (_(" frames per second = %.2f\n"), ((float) target->fps.num /
-                                               (float) target->fps.den));
+    printf (_(" frames per second = %.2f\n"), ((float) target->fps.num / (float) target->fps.den));
     printf (_(" file pattern = %s\n"), target->file);
-    printf (_(" file format = %s\n"),
-            ((target->target ==
-              CAP_NONE) ? "AUTO" : _(xvc_formats[target->target].longname)));
-    printf (_(" video encoding = %s\n"),
-            ((target->targetCodec ==
-              CODEC_NONE) ? "AUTO" : xvc_codecs[target->targetCodec].name));
-    printf (_(" audio codec = %s\n"),
-            ((target->au_targetCodec ==
-              CODEC_NONE) ? "AUTO" : xvc_audio_codecs[target->au_targetCodec].
-             name));
+    printf (_(" file format = %s\n"),  xvc_formats[target->target].longname);
+    printf (_(" video encoding = %s\n"), ((target->targetCodec == VID_CODEC_NONE) ? "AUTO" : xvc_video_codecs[target->targetCodec].name));
+    printf (_(" audio codec = %s\n"), ((target->au_targetCodec == AU_CODEC_NONE) ? "AUTO" : xvc_audio_codecs[target->au_targetCodec].name));
     printf (_(" verbose level = %d\n"), app->verbose);
     printf (_(" frame start no = %d\n"), target->start_no);
     printf (_(" frames to store = %d\n"), target->frames);
     printf (_(" time to capture = %i sec\n"), target->time);
-    printf (_(" autocontinue = %s\n"),
-            ((app->flags & FLG_AUTO_CONTINUE) ? "yes" : "no"));
-    printf (_(" input source = %s (%d)\n"), app->source,
-            app->flags & FLG_USE_SHM);
+    printf (_(" autocontinue = %s\n"), ((app->flags & FLG_AUTO_CONTINUE) ? "yes" : "no"));
+    printf (_(" input source = %s (%d)\n"), app->source, app->flags & FLG_USE_SHM);
     printf (_(" capture pointer = %s\n"), mp);
-    printf (_(" capture audio = %s\n"),
-            ((target->audioWanted == 1) ? "yes" : "no"));
+    printf (_(" capture audio = %s\n"), ((target->audioWanted == 1) ? "yes" : "no"));
     printf (_(" - input = %s\n"), app->snddev);
     printf (_(" - sample rate = %i\n"), target->sndrate);
     printf (_(" - bit rate = %i\n"), target->sndsize);

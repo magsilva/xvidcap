@@ -707,3 +707,19 @@ xvc_read_fps_from_string (const char *fps_string)
     }
     return fps;
 }
+
+
+int xvc_count_audio_codecs()
+{
+	return sizeof(xvc_audio_codecs) / sizeof(XVC_AuCodec);
+}
+
+int xvc_count_video_codecs()
+{
+	return sizeof(xvc_video_codecs) / sizeof(XVC_VidCodec);
+}
+
+int xvc_count_formats()
+{
+	return sizeof(xvc_formats) / sizeof(XVC_FFormat);
+}
