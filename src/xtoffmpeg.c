@@ -390,12 +390,15 @@ add_audio_stream (Job * job)
             else {
                 au_out_st->audio_resample = 1;
                 au_out_st->resample =
-                    audio_resample_init (au_c->channels,
-                                         au_in_st->st->codec->
-                                         channels,
-                                         au_c->sample_rate,
-                                         au_in_st->st->codec->sample_rate);
-                if (!au_out_st->resample) {
+                    av_audio_resample_init(au_c->channels,
+                                           au_in_st->st->codec->channels,
+                                           au_c->sample_rate,
+                                           au_in_st->st->codec->sample_rate,
+                                           AV_SAMPLE_FMT_S16,
+                                           AV_SAMPLE_FMT_S16,
+                                           16, 10, 0, 0.8);
+
+                if (au_out_st->resample == NULL) {
                     fprintf(stderr, _("%s %s: Can't resample. Aborting.\n"));
                     if (au_in_st) {
                         av_free (au_in_st);
@@ -408,12 +411,15 @@ add_audio_stream (Job * job)
             au_in_st->st->codec->channels = au_c->channels;
         } else {
             au_out_st->audio_resample = 1;
-            au_out_st->resample =
-                audio_resample_init (au_c->channels,
-                                     au_in_st->st->codec->channels,
-                                     au_c->sample_rate,
-                                     au_in_st->st->codec->sample_rate);
-            if (!au_out_st->resample) {
+            av_audio_resample_init(au_c->channels,
+                                   au_in_st->st->codec->channels,
+                                   au_c->sample_rate,
+                                   au_in_st->st->codec->sample_rate,
+                                   AV_SAMPLE_FMT_S16,
+                                   AV_SAMPLE_FMT_S16,
+                                   16, 10, 0, 0.8);
+
+            if (au_out_st->resample == NULL) {
                 fprintf(stderr, _("%s %s: Can't resample. Aborting.\n"));
                 if (au_in_st) {
                     av_free (au_in_st);
@@ -710,19 +716,18 @@ capture_audio_thread (Job * job)
                 ptr = pkt.data;
                 while (len > 0) {
                     // decode the packet if needed
+                    AVPacket avpkt;
+                    av_init_packet(&avpkt);
+                    avpkt.data = ptr;
+                    avpkt.size = len;
                     data_buf = NULL;   /* fail safe */
                     data_size = 0;
 
                     if (au_in_st->decoding_needed) {
-                        samples = av_fast_realloc (samples, &samples_size,
-                                                   FFMAX (pkt.size,
-                                                          AVCODEC_MAX_AUDIO_FRAME_SIZE));
+                        samples = av_fast_realloc(samples, &samples_size, FFMAX(pkt.size, AVCODEC_MAX_AUDIO_FRAME_SIZE));
                         data_size = samples_size;
-                        /* XXX: could avoid copy if PCM 16 bits with same
-                         * endianness as CPU */
-                        ret =
-                            avcodec_decode_audio2 (au_in_st->st->codec, samples,
-                                                   &data_size, ptr, len);
+                        /* XXX: could avoid copy if PCM 16 bits with same endianness as CPU */
+                        ret = avcodec_decode_audio3(au_in_st->st->codec, samples, &data_size, &avpkt);
                         if (ret < 0) {
                             fprintf(stderr, _("Couldn't decode captured audio packet\n"));
                             break;
@@ -1215,11 +1220,11 @@ xvc_ffmpeg_save_frame (FILE * fp, XImage * image)
 
         // guess AVOutputFormat
         if (job->target >= CAP_AVI)
-            file_oformat = guess_format (xvc_formats[job->target].ffmpeg_name, NULL, NULL);
+            file_oformat = av_guess_format(xvc_formats[job->target].ffmpeg_name, NULL, NULL);
         else {
             char tmp_fn[30];
             snprintf (tmp_fn, 29, "test-%%d.%s", xvc_formats[job->target].extensions[0]);
-            file_oformat = guess_format (NULL, tmp_fn, NULL);
+            file_oformat = av_guess_format(NULL, tmp_fn, NULL);
         }
         if (!file_oformat) {
             fprintf(stderr, _("Couldn't determin output format ... aborting\n"));
@@ -1227,19 +1232,18 @@ xvc_ffmpeg_save_frame (FILE * fp, XImage * image)
         }
 
 		// prepare AVFormatContext
-        output_file = av_alloc_format_context ();
-        if (!output_file) {
+        output_file = avformat_alloc_context();
+        if (! output_file) {
             fprintf (stderr, _("Error allocating memory for format context ... aborting\n"));
             exit (1);
         }
         output_file->oformat = file_oformat;
         if (output_file->oformat->priv_data_size > 0) {
-            output_file->priv_data =
-                av_mallocz (output_file->oformat->priv_data_size);
+            output_file->priv_data = av_mallocz(output_file->oformat->priv_data_size);
             // FIXME: do I need to free this?
-            if (!output_file->priv_data) {
-                fprintf (stderr, _("Error allocating private data for format context ... aborting\n"));
-                exit (1);
+            if (! output_file->priv_data) {
+                fprintf(stderr, _("Error allocating private data for format context ... aborting\n"));
+                exit(1);
             }
         }
         // output_file->packet_size= mux_packet_size;
