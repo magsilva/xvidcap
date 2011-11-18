@@ -17,35 +17,35 @@
             <arg choice="opt">-v</arg>
 
             <arg choice="opt"><arg choice="plain">--mf</arg>|<arg choice="plain">--sf</arg></arg>
-            <arg choice="opt">--file <replaceable>Dateinamens-Muster</replaceable><arg choice="plain">|-</arg></arg>
-            <arg choice="opt">--fps <replaceable>Einzelbilder pro Sekunden</replaceable></arg>
+            <arg choice="opt">--file <replaceable>file name pattern</replaceable><arg choice="plain">|-</arg></arg>
+            <arg choice="opt">--fps <replaceable>frames per second</replaceable></arg>
 
             <arg choice="opt">--cap_geometry <replaceable>geometry</replaceable></arg>
-            <arg choice="opt">--rescale <replaceable>Prozentuelle Ausgabegröße</replaceable></arg>
-            <arg choice="opt">--quality <replaceable>Prozentuelle Qualität</replaceable></arg>
+            <arg choice="opt">--rescale <replaceable>size percentage</replaceable></arg>
+            <arg choice="opt">--quality <replaceable>quality percentage</replaceable></arg>
             <arg choice="opt">--source <arg choice="plain">x11|shm</arg></arg>
 
-            <arg choice="opt">--time <replaceable>maximale Aufnahmedauer in Sekunden</replaceable></arg>
-            <arg choice="opt">--frames <replaceable>Maximale Einzelbilder</replaceable></arg>
-            <arg choice="opt">--start_no <replaceable>Anfängliche Bildnummer</replaceable></arg>
+            <arg choice="opt">--time <replaceable>maximum duration in seconds</replaceable></arg>
+            <arg choice="opt">--frames <replaceable>maximum frames</replaceable></arg>
+            <arg choice="opt">--start_no <replaceable>initial frame number</replaceable></arg>
 
             <arg choice="opt">--continue <arg choice="plain">yes|no</arg></arg>
             <arg choice="opt">--gui <arg choice="plain">yes|no</arg></arg>
 
             <arg choice="opt">--auto</arg>
 
-            <arg choice="opt">--codec <replaceable>Video Codec</replaceable></arg>
+            <arg choice="opt">--codec <replaceable>video codec</replaceable></arg>
             <arg choice="opt">--codec-help</arg>
-            <arg choice="opt">--format <replaceable>Format der Ausgabedatei</replaceable></arg>
+            <arg choice="opt">--format <replaceable>output file format</replaceable></arg>
             <arg choice="opt">--format-help</arg>
 
             <arg choice="opt">--audio <arg choice="plain">yes|no</arg></arg>
-            <arg choice="opt">--aucodec <replaceable>Audio Codec</replaceable></arg>
+            <arg choice="opt">--aucodec <replaceable>audio codec</replaceable></arg>
             <arg choice="opt">--aucodec-help</arg>
-            <arg choice="opt">--audio_in <replaceable>Ton Aufnahmegerät</replaceable><arg choice="plain">|-</arg></arg>
-            <arg choice="opt">--audio_bits <replaceable>Ton Bit-Rate</replaceable></arg>
-            <arg choice="opt">--audio_rate <replaceable>Ton Abtastrate</replaceable></arg>
-            <arg choice="opt">--audio_channels <replaceable>Ton Kanäle</replaceable></arg>
+            <arg choice="opt">--audio_in <replaceable>audio capture device</replaceable><arg choice="plain">|-</arg></arg>
+            <arg choice="opt">--audio_bits <replaceable>audio bit rate</replaceable></arg>
+            <arg choice="opt">--audio_rate <replaceable>audio sample rate</replaceable></arg>
+            <arg choice="opt">--audio_channels <replaceable>audio channels</replaceable></arg>
         </cmdsynopsis>
     </refsynopsisdiv>
 
@@ -73,14 +73,14 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--file <replaceable>Dateinamens-Muster</replaceable></option></term>
+                <term><option>--file <replaceable>file name pattern</replaceable></option></term>
                 <listitem>
                     <para>Dateiname oder Muster zur Verwendung beim Abspeichern der aufgenommenen Bilder. Ein Muster enthält Formatierungsangaben wie sie von printf() verwendet werden (s. <literal>man printf</literal>), um es zu ermöglichen, den Dateinamen hochzuzählen, z. B. <literal>--file out-%02d.xwd</literal>. Bei der Einzelbild-Aufnahme ist dies nötig. <application>xvidcap</application> wird das erste Vorkommen einer printf() Formatierungs-Information durch die Nummer des aktuellen Einzelbilds ersetzen. Im obigen Beispiel etwa werden Dateien <filename>out-00.xwd</filename>, <filename>out-01.xwd</filename>, <filename>out-02.xwd</filename>etc. geschrieben. Die Anfangsnummer der Nummerierung kann mit <literal>--start_no</literal>angegeben werden, s. oben.</para>
                     <para>Film-Aufnahmen benötigen kein hochzählbaren Dateinamen. Wenn dennoch ein Muster im Dateinamen enthalten ist, wie etwa <literal>--file mymovie-%d.mpeg</literal> , wird <application>xvidcap</application> die Formatierungsangabe durch die Nummer der aktuellen Aufnahme-Sitzung (die Nummerierung beginnt immer bei Null) ersetzen. Dies ermöglicht es, diese Nummer manuell heraufzusetzen oder die automatische Aufnahme-Fortsetzung zu verwenden (s. unten bei <literal>--continue</literal> ), um damit eine Serie von Filmen zu erzeugen.</para> 
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--fps <replaceable>Einzelbilder pro Sekunden</replaceable></option></term>
+                <term><option>--fps <replaceable>frames per second</replaceable></option></term>
                 <listitem>
                     <para>Gibt die Anzahl von Einzelbildern (Frames) an, die pro Sekunde aufgenommen werden sollen. Diese Option akzeptiert Fliesskomma-Werte als Parameter, was es ermöglicht, sehr kleine Raten anzugeben (z. B. <literal>--fps 0.5</literal> ), um etwa ein Bild nur alle zwei Sekunden aufzunehmen. Dies ist allerdings nur bei der Einzelbildaufnahme möglich, da die bei der Film-Aufnahme verwendeten Video Codecs in der Regel nur bestimmte Bildraten als gültig akzeptieren. Fliesskomma-Werte für Codecs wie MPEG1, die nur ganz bestimmte Raten zulassen, sind in dieser Version deaktiviert. Es existiert eine Inkonsistenz bei der Behandlung von Fliesskomma Bildraten zwischen libavcodec und <application>xvidcap</application> . In diesen Fällen werden nur ganzzahlige Bildraten akzeptiert.</para> 
                 </listitem>
@@ -93,13 +93,13 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--rescale <replaceable>Prozentuelle Ausgabegröße</replaceable></option></term>
+                <term><option>--rescale <replaceable>size percentage</replaceable></option></term>
                 <listitem>
                     <para>Ändert die Grösse des ausgegebenen Films relativ zur Eingangsgrösse des Aufnahmebereichs. Ein Wert von bspw. <literal>25</literal> erzeugt ein Video, dessen Bilder eine Grösse von 25 Prozent der Originalgrösse haben. Die Aufnahme-Verkleinerung funktioniert nicht mit XWD Ausgabe.</para> 
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--quality <replaceable>Prozentuelle Qualität</replaceable></option></term>
+                <term><option>--quality <replaceable>quality percentage</replaceable></option></term>
                 <listitem>
                     <para>Geben Sie einen Wert zwischen <literal>0</literal> und <literal>100</literal> an für die Qualität der Kodierung. Der Vorgabewert liegt bei <literal>90</literal>. Bedenken Sie, dass sich die Auswirkungen von Werten unter <literal>100</literal> mit Version 1.1.5 geändert haben.</para> 
                 </listitem>
@@ -111,19 +111,19 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--time <replaceable>maximale Aufnahmedauer in Sekunden</replaceable></option></term>
+                <term><option>--time <replaceable>maximum duration in seconds</replaceable></option></term>
                 <listitem>
                     <para>Gibt die maximale Dauer einer einzelnen Aufnahmesitzung an. Wenn der Wert auf <literal>0</literal> dafür sorgen, dass <application>xvidcap</application> die Aufnahme fortsetzen bis sie interaktiv beendet wird. Bei jedem anderen Wert wird die Aufnahme nach der angegebenen Anzahl Sekunden automatisch beendet. Dieser Parameter kolliediert ggf. mit <literal>--frames</literal> (s. unten). Wenn beide spezifiziert sind, wird <application>xvidcap</application> die Aufnahme bei der ersten eintretenden Begrenzung beendet. Das Programm akzeptiert Fliesskomma-Werte wie <literal>2.5</literal>.</para> 
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--frames <replaceable>Maximale Einzelbilder</replaceable></option></term>
+                <term><option>--frames <replaceable>maximum frames</replaceable></option></term>
                 <listitem>
                     <para>Beendet die Aufnahme automatisch nach der angegebenen Anzahl Einzelbilder. Wenn der Wert auf <literal>0</literal> die Aufnahme fortsetzen bis sie interaktiv beendet wird, s. <literal>--time</literal> oben.</para> 
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--start_no <replaceable>Anfängliche Bildnummer</replaceable></option></term>
+                <term><option>--start_no <replaceable>initial frame number</replaceable></option></term>
                 <listitem>
                     <para>Geben Sie hier die Zahl an, die als erstes bei der Einzelbild-Aufnahme für die Nummerierung von Einzelbildern und Dateien verwendet werden soll. Der Vorgabewert ist <literal>0</literal>. Dieser Parameter wird nur von der Einzelbild-Aufnahme verwendet. Die Zählung der Video Dateien bei der Film-Aufnahme unter Verwendung von <literal>--continue</literal> beginnt immer bei</para> 
                 </listitem>
@@ -147,7 +147,7 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--codec <replaceable>Video Codec</replaceable></option></term>
+                <term><option>--codec <replaceable>video codec</replaceable></option></term>
                 <listitem>
                     <para>Setzt explizit einen Codec ggf. anstelle des automatisch erkannten oder in den Einstellungen gespeicherten.</para> 
                 </listitem>
@@ -159,7 +159,7 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--format <replaceable>Format der Ausgabedatei</replaceable></option></term>
+                <term><option>--format <replaceable>output file format</replaceable></option></term>
                 <listitem>
                     <para>Setzt explizit ein Dateiformat ggf. anstelle des automatisch erkannten oder in den Einstellungen gespeicherten.</para> 
                 </listitem>
@@ -185,7 +185,7 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--aucodec <replaceable>Audio Codec</replaceable></option></term>
+                <term><option>--aucodec <replaceable>audio codec</replaceable></option></term>
                 <listitem>
                     <para>Setzt explizit einen Ton Codec ggf. anstelle des automatisch erkannten oder in den Einstellungen gespeicherten.</para> 
                 </listitem>
@@ -197,7 +197,7 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--audio_in <replaceable>Ton Aufnahmegerät</replaceable>|-</option></term>
+                <term><option>--audio_in <replaceable>audio capture device</replaceable>|-</option></term>
                 <listitem>
                     <para>Wählt als Ton-Eingang entweder das angegebene Gerät oder STDIN. Letzteres erlaubt es, die Aufnahme mit einer existierenden Ton-Aufnahme zu hinterlegen. Dazu verwendet man einen Aufruf wie den folgenden. Der Vorgabewert ist <filename>/dev/dsp</filename>.</para> 
                     <para>
@@ -206,19 +206,19 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--audio_bits <replaceable>Ton Bit-Rate</replaceable></option></term>
+                <term><option>--audio_bits <replaceable>audio bit rate</replaceable></option></term>
                 <listitem>
                     <para>Setzt die gewünschte Bit Rate. Der Vorgabewert ist <literal>64000</literal> Bit. Bei der Verwendung von STDIN als Ton-Eingang wird die Quelle ggf. konvertiert.</para> 
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--audio_rate <replaceable>Ton Abtastrate</replaceable></option></term>
+                <term><option>--audio_rate <replaceable>audio sample rate</replaceable></option></term>
                 <listitem>
                     <para>Setzt die gewünschte Abtastrate. Der Vorgabewert ist <literal>44100</literal> Hz. Bei der Verwendung von STDIN als Ton-Eingang wird die Quelle ggf. konvertiert.</para> 
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><option>--audio_channels <replaceable>Ton Kanäle</replaceable></option></term>
+                <term><option>--audio_channels <replaceable>audio channels</replaceable></option></term>
                 <listitem>
                     <para>Setzt die gewünschte Anzahl von Ton Kanälen. Der Vorgabewert ist <literal>2</literal> für stereo. Jeglicher Wert über <literal>2</literal> ist wahrscheinlich nur bei STDIN als Ton-Quelle und einer 5-Kanal AC Audio Datei oder sehr guter und seltener Aufnahme-Ausstattung sinnvoll.</para> 
                 </listitem>

@@ -102,7 +102,7 @@ xvc_server_object_class_init (XvcServerObjectClass * klass)
 
     /* &dbus_glib__object_info is provided in the server-bindings.h file */
     /* OBJECT_TYPE_SERVER is the GType of your server object */
-    dbus_g_object_type_install_info (xvc_server_object_get_type (),
+    dbus_g_object_type_install_info (xvc_server_object_get_type(),
                                      &dbus_glib_xvc_server_object_info);
 }
 

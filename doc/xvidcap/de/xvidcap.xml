@@ -14,7 +14,7 @@
 <!ENTITY mf-cap "multi-frame capture">
 <!ENTITY sf-cap "single-frame capture">
 ]>
-<article id="index" lang="xvidcap.xml-de">
+<article id="index" lang="en">
     <!-- please do not change the id; for translations, change lang to -->
     <!-- appropriate code -->
     <articleinfo>
@@ -27,7 +27,7 @@
         <copyright>
         <year>2007</year>
         <holder>Karl H. Beckers (German translation)</holder>
-        </copyright><copyright><year>2006</year><holder>Karl H. Beckers (karl.h.beckers@gmx.net)</holder></copyright>
+        </copyright>
 
         <publisher>
             <publishername>Karl H. Beckers</publishername>
@@ -97,7 +97,21 @@
         <title>Überblick</title>
         <para><application>xvidcap</application> ist eine Anwendung, die Bewegungen in einem ausgewählten Bereich eines X11 Bildschirms in Dateien speichert. Sie tut dies, indem Sie eine konfigurierbare Anzahl Bildschirmfotos pro Sekunde macht und sie entweder als Einzelbilder oder als Video abspeichert. Diese Art von Anwendung wird heute gemeinhin als ScreenCam oder ScreenCast Werkzeug bezeichnet. Eines der ältesten Werkzeuge dieser Art war <application>Lotus Screencam</application> und diente als Inspiration für <application>xvidcap</application>.</para>
 
-        <para><application>xvidcap</application> kann auf zwei unterschiedliche Arten verwendet werden: <orderedlist><listitem><para><guilabel>Einzelbild-Aufnahme</guilabel> -- Aufnahme einzelner Bildschirmfotos in jeweils eine Datei. </para></listitem><listitem><para><guilabel>Film-Aufnahme</guilabel> -- Aufnahme und Kodierung zu einer Video-Datei in Echtzeit. </para></listitem></orderedlist></para>    
+        <para>
+            <application>xvidcap</application> can be used in two distinct modes of operation:
+            <orderedlist>
+                <listitem>
+                    <para>
+                        <guilabel>single-frame capture</guilabel> -- capture individual screenshots to one file each.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <guilabel>multi-frame capture</guilabel> -- capture and encode to video on the fly.
+                    </para>
+                </listitem>
+            </orderedlist>
+        </para>    
 
         <tip>
             <title>Merker</title>
@@ -339,7 +353,25 @@
                                     </listitem>
                                     <listitem>
                                         <para>Auf den Bildschirmhintergrund clicken, um Vollbild-Aufnahme auszuwählen.</para>
-                                        <caution><title>Vollbild Aufnahme</title><para>Bei aktuellen Anzeigegrößen besteht bei Vollbild-Aufnahme eine hohe Wahrscheinlichkeit, zu viel Last auf Ihrem System zu verursachen. Beobachten Sie den Bild-Verlust Messer und passen Sie gegebenenfalls Ihre Bildschirmauflösung an, wenn Sie unbedingt den gesamten Bildschirm aufnehmen müssen. Bedenken Sie, dass eine DVD üblicherweise Auflösungen um 720 x 486 enthält. Eine Vollbild-Aufnahme bei einer Auflösung von 1400 x 1050 wird ungefähr die vierfache Menge der Datenrate einer DVD zur Laufzeit kodiert -- nicht etwas, was Sie mit Stift und Papier berechnen.</para> Es ist jedoch nicht nur das Kodieren einer Vollbild-Aufnahme, die Überlast auf Ihrem System erzeugen kann. Den gesamten Aufnahmebereich für jedes Einzelbild vollständig zu erfassen, ist schon für sich genommen eine erhebliche Aufgabe. Die Verwendung der XDamage Erweiterung kann die resultierenden Effekte vermeiden helfen, es könnten jedoch Seiteneffekte auftreten. Vergleichen Sie den entsprechenden Absatz zum Reiter <ulink type="help" url="ghelp:xvidcap?xvidcap-prefs-TBL-set-xdamage">Allgemeine Einstellungen</ulink> des Einstellungen Dialogs. <para/></caution>
+                                        <caution>
+                                            <title>Full-Screen Capture</title>
+                                            <para>
+                                                With current display sizes, full-screen capture has a very high probability of
+                                                putting too much stress on your system. Watch the frame drop monitor and possibly
+                                                adjust your screen resolution if you absolutely must capture full-screen. 
+                                                Remember that DVDs typically contain resolutions of 720 x 486. Capturing full-screen 
+                                                at a resolution of 1400 x 1050 means encoding about 4 times the data rate of a DVD
+                                                in real time -- not something you will be doing with a pencil and paper.
+                                            </para>
+						It is not just the encoding of a full screen capture, though, that may put 
+						too much stress on your system. Grabbing the complete capture area from the X11 
+						display is a heavy task on its own right. Using the XDamage extension may ease
+						the effect of that, however there may be caveats. See the corresponding paragraph about the 
+						<ulink type="help" url="ghelp:xvidcap?xvidcap-prefs-TBL-set-xdamage">general options tab</ulink>
+						of the preferences dialog.
+                                            <para>
+                                            </para>
+                                        </caution>
                                     </listitem>
                                 </itemizedlist>
         			<tip>
